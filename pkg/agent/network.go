@@ -1,7 +1,7 @@
 package agent
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"os/exec"
 	//"strconv"
 	"bytes"
@@ -25,7 +25,7 @@ type Connection struct {
 //}
 
 func (n *Network) GetActiveConnections() {
-	n.Time = time.Now()
+	n.Time = time.Now().UTC()
 	netstatCmd := "netstat -tn 2>/dev/null | tail -n +3 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head"
 	cmd := exec.Command(
 		"/bin/bash",
@@ -42,6 +42,6 @@ func (n *Network) GetActiveConnections() {
 	n.Connections = append(n.Connections, c)
 	c = Connection{IPAddress: "192.168.0.15", Number: 3}
 	n.Connections = append(n.Connections, c)
-	serialized, err := json.Marshal(n)
+	//serialized, err := json.Marshal(n)
 }
 
