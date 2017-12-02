@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 func main() {
-	conn := connections()
-	fmt.Println(conn)
+	network := agent.Network{}
+	//network.Time = time.Now()
+	network.GetActiveConnections()
+	fmt.Println(network)
 }
 
