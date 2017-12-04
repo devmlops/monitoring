@@ -1,18 +1,21 @@
 package agent
 
 import (
-	//"encoding/json"
+	"strconv"
+	"encoding/json"
 	"os/exec"
 	//"strconv"
 	"bytes"
 	"time"
 	"log"
-	//"fmt"
+	"fmt"
+	"strings"
 )
 
 type Network struct {
-	Time time.Time             `json:"time"`
-	Connections []Connection   `json:"connections"`
+	Time            time.Time    `json:"time"`
+	Connections     int          `json:"connections"`
+	ConnectionsByIP []Connection `json:"connections_by_ip"`
 }
 
 type Connection struct {
@@ -26,7 +29,7 @@ type Connection struct {
 
 func (n *Network) GetActiveConnections() {
 	n.Time = time.Now().UTC()
-	netstatCmd := "netstat -tn 2>/dev/null | tail -n +3 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head"
+	netstatCmd := "netstat -tn 2>/dev/null | tail -n +3 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr"
 	cmd := exec.Command(
 		"/bin/bash",
 		"-c",
@@ -38,10 +41,20 @@ func (n *Network) GetActiveConnections() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := Connection{IPAddress: "8.8.8.8", Number: 24}
-	n.Connections = append(n.Connections, c)
-	c = Connection{IPAddress: "192.168.0.15", Number: 3}
-	n.Connections = append(n.Connections, c)
-	//serialized, err := json.Marshal(n)
+	lines := strings.Split(out.String(), "\n")
+	for _, line := range lines {
+		perIP := strings.Fields(line)
+		if len(perIP) > 0 {
+			number, err := strconv.Atoi(perIP[0])
+			if err != nil {
+				log.Fatal(err)
+			}
+			c := Connection{IPAddress: perIP[1], Number: number}
+			n.ConnectionsByIP = append(n.ConnectionsByIP, c)
+			n.Connections += number
+		}
+	}
+	ser, err := json.Marshal(n)
+	fmt.Println(string(ser))
 }
 
