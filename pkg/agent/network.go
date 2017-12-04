@@ -9,6 +9,7 @@ import (
 	"log"
 	"fmt"
 	"strings"
+	"sync"
 )
 
 type Network struct {
@@ -26,7 +27,8 @@ type Connection struct {
 //	Results()
 //}
 
-func (n *Network) RunJob() {
+func (n *Network) RunJob(wg *sync.WaitGroup) {
+	defer wg.Done()
 	n.GetActiveConnections()
 }
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sync"
 )
 
 type Swap struct {
@@ -26,7 +27,8 @@ type ProcessSwap struct {
 	SwapPercent float32 `json:"swap_percent"`
 }
 
-func (s *Swap) RunJob() {
+func (s *Swap) RunJob(wg *sync.WaitGroup) {
+	defer wg.Done()
 	s.GetSwapUsageTotal()
 	s.GetSwapUsageByProcess()
 }

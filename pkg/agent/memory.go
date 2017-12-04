@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sync"
 )
 
 type Memory struct {
@@ -26,7 +27,8 @@ type ProcessMemory struct {
 	MemoryPercent float32 `json:"memory_percent"`
 }
 
-func (m *Memory) RunJob() {
+func (m *Memory) RunJob(wg *sync.WaitGroup) {
+	defer wg.Done()
 	m.GetMemoryUsageTotal()
 	m.GetMemoryUsageByProcess()
 }

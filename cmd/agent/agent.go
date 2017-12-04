@@ -1,16 +1,23 @@
 package main
 
 import (
+	"sync"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 func main() {
-	//network := agent.Network{}
-	//network.RunJob()
-    //
-	//swap := agent.Swap{}
-	//swap.RunJob()
+	var wg sync.WaitGroup
+	
+	wg.Add(3)
+	
+	network := agent.Network{}
+	go network.RunJob(&wg)
+
+	swap := agent.Swap{}
+	go swap.RunJob(&wg)
 
 	memory := agent.Memory{}
-	memory.RunJob()
+	go memory.RunJob(&wg)
+	
+	wg.Wait()
 }
