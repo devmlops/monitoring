@@ -5,14 +5,12 @@ import (
 )
 
 func main() {
-	network := agent.Network{}
-	network.GetActiveConnections()
-
-	swap := agent.Swap{}
-	swap.GetSwapUsageTotal()
-	swap.GetSwapUsageByProcess()
+	//network := agent.Network{}
+	//network.RunJob()
+    //
+	//swap := agent.Swap{}
+	//swap.RunJob()
 
 	memory := agent.Memory{}
-	memory.GetMemoryUsageTotal()
-	memory.GetMemoryUsageByProcess()
+	memory.RunJob()
 }

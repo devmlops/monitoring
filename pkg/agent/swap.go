@@ -26,6 +26,11 @@ type ProcessSwap struct {
 	SwapPercent float32 `json:"swap_percent"`
 }
 
+func (s *Swap) RunJob() {
+	s.GetSwapUsageTotal()
+	s.GetSwapUsageByProcess()
+}
+
 func (s *Swap) GetSwapUsageByProcess() {
 	s.Time = time.Now().UTC()
 	swapCmd := `for file in /proc/*/status ; do awk '/^Pid|VmSwap|Name/{printf $2 " "}END{ print ""}' $file; done | sort -k 3 -n -r`

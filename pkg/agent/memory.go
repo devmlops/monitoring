@@ -26,6 +26,11 @@ type ProcessMemory struct {
 	MemoryPercent float32 `json:"memory_percent"`
 }
 
+func (m *Memory) RunJob() {
+	m.GetMemoryUsageTotal()
+	m.GetMemoryUsageByProcess()
+}
+
 func (m *Memory) GetMemoryUsageByProcess() {
 	m.Time = time.Now().UTC()
 	swapCmd := `for file in /proc/*/status ; do awk '/^Pid|VmMemory|Name/{printf $2 " "}END{ print ""}' $file; done | sort -k 3 -n -r`
@@ -63,7 +68,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 }
 
 func (m *Memory) GetMemoryUsageTotal() {
-	swapCmd := `cat /proc/swaps | tail -n1`
+	swapCmd := `cat /proc/meminfo | awk '/MemTotal|MemFree|Buffers|^Cached/{printf $2 " "}END{ print ""}'`
 	cmd := exec.Command(
 		"/bin/bash",
 		"-c",
@@ -75,14 +80,23 @@ func (m *Memory) GetMemoryUsageTotal() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	swap := strings.Fields(out.String())
-	m.MemoryTotalKB, err = strconv.Atoi(swap[2])
+	memory := strings.Fields(out.String())
+	m.MemoryTotalKB, err = strconv.Atoi(memory[0])
 	if err != nil {
 		log.Fatal(err)
 	}
-	m.MemoryUsedKB, err = strconv.Atoi(swap[3])
+	free, err := strconv.Atoi(memory[1])
 	if err != nil {
 		log.Fatal(err)
 	}
+	buffers, err := strconv.Atoi(memory[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+	cached, err := strconv.Atoi(memory[3])
+	if err != nil {
+		log.Fatal(err)
+	}
+	m.MemoryUsedKB = (m.MemoryTotalKB - free) - (buffers + cached)
 	m.MemoryUsedPercent = float32(m.MemoryUsedKB) / float32(m.MemoryTotalKB) * 100.0
 }

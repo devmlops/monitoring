@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"encoding/json"
 	"os/exec"
-	//"strconv"
 	"bytes"
 	"time"
 	"log"
@@ -26,6 +25,10 @@ type Connection struct {
 //type Report interface {
 //	Results()
 //}
+
+func (n *Network) RunJob() {
+	n.GetActiveConnections()
+}
 
 func (n *Network) GetActiveConnections() {
 	n.Time = time.Now().UTC()
