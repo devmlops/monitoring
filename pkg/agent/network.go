@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"net/http"
 	"strconv"
 	"encoding/json"
 	"os/exec"
@@ -61,5 +62,9 @@ func (n *Network) GetActiveConnections() {
 	}
 	ser, err := json.Marshal(n)
 	fmt.Println(string(ser))
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(n)
+	res, _ := http.Post("http://127.0.0.1:8080", "application/json; charset=utf-8", b)
+	fmt.Println(res)
 }
 

@@ -35,11 +35,11 @@ func (m *Memory) RunJob(wg *sync.WaitGroup) {
 
 func (m *Memory) GetMemoryUsageByProcess() {
 	m.Time = time.Now().UTC()
-	swapCmd := `for file in /proc/*/status ; do awk '/^Pid|VmMemory|Name/{printf $2 " "}END{ print ""}' $file; done | sort -k 3 -n -r`
+	memoryCmd := `for file in /proc/*/status ; do awk '/^Pid|VmRSS|Name/{printf $2 " "}END{ print ""}' $file; done | sort -k 3 -n -r`
 	cmd := exec.Command(
 		"/bin/bash",
 		"-c",
-		swapCmd,
+		memoryCmd,
 	)
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -55,12 +55,13 @@ func (m *Memory) GetMemoryUsageByProcess() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			swap, err := strconv.Atoi(perProcess[2])
+			memory, err := strconv.Atoi(perProcess[2])
 			if err != nil {
 				log.Fatal(err)
 			}
-			if swap > 0 {
-				p := ProcessMemory{Name: perProcess[0], PID: PID, MemoryKB: swap}
+			if memory > 0 {
+				p := ProcessMemory{Name: perProcess[0], PID: PID, MemoryKB: memory}
+				p.MemoryPercent = float32(p.MemoryKB) / float32(m.MemoryTotalKB) * 100.0
 				m.MemoryByProcess = append(m.MemoryByProcess, p)
 			}
 		}
