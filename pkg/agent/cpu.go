@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 	"sync"
+	"bytes"
+	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/process"
@@ -17,7 +19,7 @@ type CPU struct {
 }
 
 type ProcessCPU struct {
-	PID           int     `json:"pid"`
+	Pid           int32     `json:"pid"`
 	Name          string  `json:"name"`
 	CPUUsedPercent float64 `json:"cpu_used_percent"`
 }
@@ -25,7 +27,7 @@ type ProcessCPU struct {
 func (c *CPU) RunJob(wg *sync.WaitGroup) {
 	defer wg.Done()
 	c.GetCPUUsageTotal()
-	//c.GetCPUUsageByProcess()
+	c.GetCPUUsageByProcess()
 }
 
 func (c *CPU) GetCPUUsageTotal() {
@@ -35,8 +37,6 @@ func (c *CPU) GetCPUUsageTotal() {
 		log.Fatal(err)
 	}
 	c.CPUUsedPercent = cpuUsage[0]
-	ser, err := json.Marshal(c)
-	fmt.Println(string(ser))
 }
 
 func (c *CPU) GetCPUUsageByProcess() {
@@ -45,7 +45,13 @@ func (c *CPU) GetCPUUsageByProcess() {
 	for _, pid := range ps {
 		cpuPercent, _ := pid.CPUPercent()
 		name, _ := pid.Name()
-		fmt.Println(name)
-		fmt.Println(cpuPercent)
+		p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
+		c.CPUByProcess = append(c.CPUByProcess, p)
 	}
+	ser, _ := json.Marshal(c)
+	fmt.Println(string(ser))
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(c)
+	res, _ := http.Post("http://192.168.88.141:8080", "application/json; charset=utf-8", b)
+	fmt.Println(res)
 }
