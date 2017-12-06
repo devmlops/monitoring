@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	//	"bytes"
-	//	"net/http"
+	"bytes"
+	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/net"
 )
@@ -45,23 +45,27 @@ func (n *Network) GetActiveConnections() {
 		}
 
 	}
-	nn := map[int][]string{}
-	var a []int
-	for k, v := range freq {
-		nn[v] = append(nn[v], k)
+	reversed_freq := map[int][]string{}
+	var numbers []int
+	for key, val := range freq {
+		reversed_freq[val] = append(reversed_freq[val], key)
 	}
-	for k := range nn {
-		a = append(a, k)
+	for val := range reversed_freq {
+		numbers = append(numbers, val)
 	}
-	sort.Sort(sort.Reverse(sort.IntSlice(a)))
-	for _, k := range a {
-		for _, s := range nn[k] {
-			fmt.Printf("%s: %d\n", s, k)
-			c := Connection{IPAddress: s, Number: k}
+	sort.Sort(sort.Reverse(sort.IntSlice(numbers)))
+	for _, number := range numbers {
+		for _, s := range reversed_freq[number] {
+			c := Connection{IPAddress: s, Number: number}
 			n.ConnectionsByIP = append(n.ConnectionsByIP, c)
-			n.Connections += k
+			n.Connections += number
 		}
 	}
 	ser, _ := json.Marshal(n)
 	fmt.Println(string(ser))
+	
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(n)
+	res, _ := http.Post("http://192.168.88.141:8080/network", "application/json; charset=utf-8", b)
+	fmt.Println(res)
 }

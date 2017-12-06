@@ -49,6 +49,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 	}
 	ser, _ := json.Marshal(c)
 	fmt.Println(string(ser))
+	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
 	res, _ := http.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
