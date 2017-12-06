@@ -1,16 +1,15 @@
 package agent
 
 import (
-	"net/http"
-	"strconv"
-	"encoding/json"
-	"os/exec"
-	"bytes"
-	"time"
-	"log"
+	"sort"
+	//	"log"
 	"fmt"
-	"strings"
 	"sync"
+	"time"
+	//	"bytes"
+	//	"net/http"
+	"encoding/json"
+	"github.com/shirou/gopsutil/net"
 )
 
 type Network struct {
@@ -20,13 +19,9 @@ type Network struct {
 }
 
 type Connection struct {
-	IPAddress string    `json:"ip_address"`
-	Number    int       `json:"number"`
+	IPAddress string `json:"ip_address"`
+	Number    int    `json:"number"`
 }
-
-//type Report interface {
-//	Results()
-//}
 
 func (n *Network) RunJob(wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -35,36 +30,38 @@ func (n *Network) RunJob(wg *sync.WaitGroup) {
 
 func (n *Network) GetActiveConnections() {
 	n.Time = time.Now().UTC()
-	netstatCmd := "netstat -tn 2>/dev/null | tail -n +3 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr"
-	cmd := exec.Command(
-		"/bin/bash",
-		"-c",
-		netstatCmd,
-	)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	lines := strings.Split(out.String(), "\n")
-	for _, line := range lines {
-		perIP := strings.Fields(line)
-		if len(perIP) > 0 {
-			number, err := strconv.Atoi(perIP[0])
-			if err != nil {
-				log.Fatal(err)
+
+	cs, _ := net.Connections("tcp")
+
+	freq := make(map[string]int)
+	for _, conn := range cs {
+		if (conn.Status == "ESTABLISHED") && (conn.Raddr.IP != "127.0.0.1") {
+			_, ok := freq[conn.Raddr.IP]
+			if ok == true {
+				freq[conn.Raddr.IP] += 1
+			} else {
+				freq[conn.Raddr.IP] = 1
 			}
-			c := Connection{IPAddress: perIP[1], Number: number}
+		}
+
+	}
+	nn := map[int][]string{}
+	var a []int
+	for k, v := range freq {
+		nn[v] = append(nn[v], k)
+	}
+	for k := range nn {
+		a = append(a, k)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	for _, k := range a {
+		for _, s := range nn[k] {
+			fmt.Printf("%s: %d\n", s, k)
+			c := Connection{IPAddress: s, Number: k}
 			n.ConnectionsByIP = append(n.ConnectionsByIP, c)
-			n.Connections += number
+			n.Connections += k
 		}
 	}
-	ser, err := json.Marshal(n)
+	ser, _ := json.Marshal(n)
 	fmt.Println(string(ser))
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(n)
-	res, _ := http.Post("http://192.168.88.141:8080", "application/json; charset=utf-8", b)
-	fmt.Println(res)
 }
-
