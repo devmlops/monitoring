@@ -2,44 +2,41 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	//"log"
 	"net/http"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"fmt"
 )
 
-
-
 func HttpServer(data *Store) *gin.Engine {
 	route := gin.Default()
 	route.POST("/network", Network(data))
 	route.POST("/memory", Memory(data))
-	route.POST("/swap", Swap)
-	route.POST("/cpu", CPU)
+	route.POST("/swap", Swap(data))
+	route.POST("/cpu", CPU(data))
 	return route
 }
 
 func Network(data *Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var json agent.Network
-		err := c.ShouldBindJSON(&json)
+		var request agent.Network
+		err := c.ShouldBindJSON(&request)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "ooops. I'm sorry =(",
 			})
 			return
 		}
-		fmt.Println(data)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
+		data.AddNetwork(request)
 	}
 }
 
 func Memory(data *Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var json agent.Memory
-		err := c.ShouldBindJSON(&json)
+		var request agent.Memory
+		err := c.ShouldBindJSON(&request)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "ooops. I'm sorry =(",
@@ -49,32 +46,42 @@ func Memory(data *Store) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		fmt.Println(data)
+		data.AddMemory(request)
 	}
 }
 
-func Swap(c *gin.Context) {
-	var json agent.Swap
-	if err := c.ShouldBindJSON(&json); err == nil {
+func Swap(data *Store) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request agent.Swap
+		err := c.ShouldBindJSON(&request)
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ooops. I'm sorry =(",
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "ooops. I'm sorry =(",
-		})
+		data.AddSwap(request)
 	}
 }
-func CPU(c *gin.Context) {
-	var request agent.CPU
-	if err := c.ShouldBindJSON(&request); err == nil {
+
+func CPU(data *Store) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request agent.CPU
+		err := c.ShouldBindJSON(&request)
+		if err == nil {
+			fmt.Printf("%#v\n", request)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ooops. I'm sorry =(",
+			})
+			return
+		}
 		fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "ooops. I'm sorry =(",
-		})
+		data.AddCPU(request)
 	}
 }

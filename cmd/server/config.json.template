@@ -1,0 +1,22 @@
+{
+  "telegramBot": {
+    "token": "123456789:AABBCCDDEEFFGGHHJJKKLLMMNNOOPPQQRRS",
+    "users": [000000000]
+  },
+  "network": {
+    "max": 100,
+    "maxLimit": 75
+  },
+  "memory": {
+    "max": 100,
+    "maxLimit": 75
+  },
+  "swap": {
+    "max": 100,
+    "maxLimit": 75
+  },
+  "cpu": {
+    "max": 100,
+    "maxLimit": 75
+  }
+}

@@ -15,10 +15,8 @@ func RunTegelegramBot(token string) *tgbotapi.BotAPI {
 	return bot
 }
 
-
-func SendAlert(message string, bot *tgbotapi.BotAPI) {
-	Users := []int64{ 282049937 }
-	for _, id := range Users {
+func SendAlert(bot *tgbotapi.BotAPI, users []int64, message string) {
+	for _, id := range users {
 		ApiMessage := tgbotapi.NewMessage(id, message)
 		bot.Send(ApiMessage)
 	}
