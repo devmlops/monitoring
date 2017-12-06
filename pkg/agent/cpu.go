@@ -41,7 +41,6 @@ func (c *CPU) GetCPUUsageTotal() {
 
 func (c *CPU) GetCPUUsageByProcess() {
 	ps, _ := process.Processes()
-	fmt.Println(ps[0])
 	for _, pid := range ps {
 		cpuPercent, _ := pid.CPUPercent()
 		name, _ := pid.Name()

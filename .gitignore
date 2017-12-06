@@ -15,6 +15,7 @@
 
 # binary
 cmd/server/server
+cmd/agent/agent
 
 # ide
 .idea
