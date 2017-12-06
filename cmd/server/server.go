@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func HttpServer(data *Store) *gin.Engine {
+func HttpServer(data *Monitor) *gin.Engine {
 	route := gin.Default()
 	route.POST("/network", Network(data))
 	route.POST("/memory", Memory(data))
@@ -16,7 +16,7 @@ func HttpServer(data *Store) *gin.Engine {
 	return route
 }
 
-func Network(data *Store) gin.HandlerFunc {
+func Network(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.Network
 		err := c.ShouldBindJSON(&request)
@@ -33,7 +33,7 @@ func Network(data *Store) gin.HandlerFunc {
 	}
 }
 
-func Memory(data *Store) gin.HandlerFunc {
+func Memory(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.Memory
 		err := c.ShouldBindJSON(&request)
@@ -50,7 +50,7 @@ func Memory(data *Store) gin.HandlerFunc {
 	}
 }
 
-func Swap(data *Store) gin.HandlerFunc {
+func Swap(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.Swap
 		err := c.ShouldBindJSON(&request)
@@ -67,7 +67,7 @@ func Swap(data *Store) gin.HandlerFunc {
 	}
 }
 
-func CPU(data *Store) gin.HandlerFunc {
+func CPU(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.CPU
 		err := c.ShouldBindJSON(&request)
