@@ -13,9 +13,12 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 
-
 # binary
 cmd/server/server
+cmd/agent/agent
 
+# ide
 .idea
 
+# config
+cmd/server/config.json

@@ -5,7 +5,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func RunTegelegramBot(token string) *tgbotapi.BotAPI {
+func RunTelegramBot(token string) *tgbotapi.BotAPI {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
