@@ -1,7 +1,7 @@
 package agent
 
 import (
-	//"bytes"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/shirou/gopsutil/disk"
@@ -42,15 +42,15 @@ func (d *Disk) GetDiskUsage() {
 		fmt.Println(string(ser))
 	}
 
-	//b := new(bytes.Buffer)
-	//json.NewEncoder(b).Encode(d)
-	//res, err := client.Post(
-	//	fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "disk"),
-	//	"application/json; charset=utf-8",
-	//	b,
-	//)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(res)
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(d)
+	res, err := client.Post(
+		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "disk"),
+		"application/json; charset=utf-8",
+		b,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(res)
 }

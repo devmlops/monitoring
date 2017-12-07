@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"sync"
-	//"fmt"
 	"time"
 )
 
@@ -16,13 +15,13 @@ func main() {
 	var wg sync.WaitGroup
 	
 	if agent.Debug == true {
-		wg.Add(1)
+		wg.Add(5)
 		p := agent.Params{UseWg: true, Wg: &wg}
 		
-		//go cpu.RunJob(&wg)
-		//go memory.RunJob(&wg)
-		//go swap.RunJob(&wg)
-		//go network.RunJob(&wg)
+		go cpu.RunJob(&p)
+		go memory.RunJob(&p)
+		go swap.RunJob(&p)
+		go network.RunJob(&p)
 		go disk.RunJob(&p)
 
 		wg.Wait()

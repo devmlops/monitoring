@@ -7,7 +7,6 @@ import (
 	"github.com/shirou/gopsutil/net"
 	"log"
 	"sort"
-	//"sync"
 	"time"
 )
 

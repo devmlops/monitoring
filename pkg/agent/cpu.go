@@ -8,7 +8,6 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"sort"
-	//"sync"
 	"time"
 )
 
