@@ -8,7 +8,6 @@ import (
 	"log"
 	"sort"
 	"time"
-	//nnn "net"
 )
 
 type Network struct {
@@ -69,7 +68,7 @@ func (n *Network) GetActiveConnections() {
 		}
 	}
 
-	n.Connections += 30
+	//n.Connections += 30
 
 	if Debug == true {
 		ser, err := json.Marshal(n)
