@@ -71,10 +71,10 @@ func (s *Swap) GetSwapUsageByProcess() {
 	ser, _ := json.Marshal(s)
 	fmt.Println(string(ser))
 	
-	//b := new(bytes.Buffer)
-	//json.NewEncoder(b).Encode(s)
-	//res, _ := http.Post("http://192.168.88.141:8080/memory", "application/json; charset=utf-8", b)
-	//fmt.Println(res)
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(s)
+	res, _ := http.Post("http://192.168.88.141:8080/memory", "application/json; charset=utf-8", b)
+	fmt.Println(res)
 }
 
 
