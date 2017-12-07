@@ -39,7 +39,6 @@ func (m *Memory) GetMemoryUsageTotal() {
 	m.MemoryTotalKB = stat.Total / 1024
 	m.MemoryUsedKB = stat.Used / 1024
 	m.MemoryUsedPercent = stat.UsedPercent
-	fmt.Println(m)
 }
 
 func (m *Memory) GetMemoryUsageByProcess() {
@@ -51,9 +50,11 @@ func (m *Memory) GetMemoryUsageByProcess() {
 	for _, proc := range ps {
 		memPercent, _ := proc.MemoryPercent()
 		stat, _ := proc.MemoryInfo()
-		name, _ := proc.Name()
-		p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS/1024}
-		reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
+		if stat.RSS > 0 {
+			name, _ := proc.Name()
+			p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS / 1024}
+			reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
+		}
 	}
 	
 	var numbers []int
