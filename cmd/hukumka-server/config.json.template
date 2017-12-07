@@ -1,4 +1,7 @@
 {
+  "server": {
+    "address": "127.0.0.1:8080"
+  },
   "telegramBot": {
     "token": "123456789:AABBCCDDEEFFGGHHJJKKLLMMNNOOPPQQRRS",
     "users": [000000000]

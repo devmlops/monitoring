@@ -15,7 +15,7 @@ type Monitor struct {
 type Store struct {
 	netData  []agent.Network
 	memData  []agent.Memory
-	swapData   []agent.Swap
+	swapData []agent.Swap
 	cpuData  []agent.CPU
 	diskData []agent.Disk
 
@@ -53,8 +53,8 @@ func (m *Monitor) AddNetwork(n agent.Network) {
 	m.store.mu.Lock()
 	m.store.netData = append(m.store.netData, n)
 	m.store.avarage.netAverage += n.Connections
-	m.store.mu.Unlock()
 	m.AnalyseNetwork(n)
+	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -62,8 +62,8 @@ func (m *Monitor) AddMemory(n agent.Memory) {
 	m.store.mu.Lock()
 	m.store.memData = append(m.store.memData, n)
 	m.store.avarage.memAverage += n.MemoryUsedKB
-	m.store.mu.Unlock()
 	m.AnalyseMemory(n)
+	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -71,8 +71,8 @@ func (m *Monitor) AddSwap(n agent.Swap) {
 	m.store.mu.Lock()
 	m.store.swapData = append(m.store.swapData, n)
 	m.store.avarage.swapAverage += n.SwapUsedKB
-	m.store.mu.Unlock()
 	m.AnalyseSwap(n)
+	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -80,8 +80,8 @@ func (m *Monitor) AddDisk(n agent.Disk) {
 	m.store.mu.Lock()
 	m.store.diskData = append(m.store.diskData, n)
 	m.store.avarage.diskAverage += n.DiskUsedKB
-	m.store.mu.Unlock()
 	m.AnalyseDisk(n)
+	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -89,8 +89,8 @@ func (m *Monitor) AddCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	m.store.cpuData = append(m.store.cpuData, n)
 	m.store.avarage.cpuAverage += n.CPUUsedPercent
-	m.store.mu.Unlock()
 	m.AnalyseCPU(n)
+	m.store.mu.Unlock()
 	//go m.Monitor
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
@@ -275,6 +275,8 @@ func (m *Monitor) AnalyseDisk(n agent.Disk) {
 	m.store.mu.Unlock()
 }
 
+//func SendCPU {}
+
 func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	result := m.store.avarage.cpuAverage / float64(len(m.store.netData))
@@ -287,6 +289,17 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Danger.cpuStatus = true
 				m.store.Warning.cpuCounter = 3
 				//fmt.Println("Allert Danger")
+
+				//message := FormMessage{
+				//	typeMessage: "Danger",
+				//	from:        "CPU",
+				//	avarage:     result,
+				//	max:         m.config.CPU.MaxLimit,
+				//	real:        n.CPUUsedPercent,
+				//	message:     "Достигнут максимальный лимит",
+				//	processes:   func string{return "bla"}()
+				//}
+
 				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
 			} else {
 				m.store.Danger.cpuCounter += 1

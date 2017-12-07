@@ -7,12 +7,17 @@ import (
 )
 
 type Config struct {
+	Server      ServerConfig
 	TelegramBot TelegramConfig
 	Network     NetworkConfig
 	Memory      MemoryConfig
 	Swap        SwapConfig
 	CPU         CpuConfig
 	Disk        DiskConfig
+}
+
+type ServerConfig struct {
+	Address string
 }
 
 type TelegramConfig struct {
