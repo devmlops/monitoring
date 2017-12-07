@@ -14,12 +14,30 @@ type Monitor struct {
 }
 
 type Store struct {
-	netData []agent.Network
-	memData []agent.Memory
-	swData  []agent.Swap
-	cpuData []agent.CPU
+	netData  []agent.Network
+	memData  []agent.Memory
+	swData   []agent.Swap
+	cpuData  []agent.CPU
+	diskData []agent.Disk
+
+	Warning Status
+	Danger  Status
 
 	mu sync.Mutex
+}
+
+type Status struct {
+	netStatus  bool
+	memStatus  bool
+	swStatus   bool
+	cpuStatus  bool
+	diskStatus bool
+
+	netCount  int
+	memCount  int
+	swCount   int
+	cpuCount  int
+	diskCount int
 }
 
 func (m *Monitor) AddNetwork(n agent.Network) {
@@ -53,6 +71,13 @@ func (m *Monitor) AddCPU(n agent.CPU) {
 	//go m.Monitor
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
+func (m *Monitor) AddDisk(n agent.Disk) {
+	m.store.mu.Lock()
+	m.store.diskData = append(m.store.diskData, n)
+	m.store.mu.Unlock()
+	//go m.Monitor
+	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
+}
 
 func (m *Monitor) AnalyseNetwork(n agent.Network) {
 	fmt.Println(n.Time)
@@ -64,12 +89,12 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 	}
 	result := float64(total) / float64(len(m.store.netData))
 	// +20%
-	if float64(n.Connections) > result * 1.2 {
-		//fmt.Sprintf("%s %s/%s", "Network: превышение на 20%", int(result), int(n.Connections))
-		SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
-	}
-	if n.Connections >= m.config.Network.MaxLimit {
-		SendAlert(m.bot, m.config.TelegramBot.Users, "(_*_)")
+	if float64(n.Connections) > result*1.2 {
+		if n.Connections >= m.config.Network.MaxLimit {
+			SendAlert(m.bot, m.config.TelegramBot.Users, "(_*_)")
+		} else {
+			SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+		}
 	}
 }
 
@@ -78,6 +103,7 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 	//mean := GetMean()
 	fmt.Println(m.store.netData[len(m.store.netData)-1].Connections)
 }
+
 //
 //func GetMean(massive []uint64) float64 {
 //	var total uint64
