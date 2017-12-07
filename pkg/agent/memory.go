@@ -73,6 +73,9 @@ func (m *Memory) GetMemoryUsageByProcess() {
 		numbers = append(numbers, int(val))
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(numbers)))
+	if len(numbers) > 5 {
+		numbers = numbers[:5]
+	}
 	for _, number := range numbers {
 		for _, p := range reversed_freq[uint64(number)] {
 			m.MemoryByProcess = append(m.MemoryByProcess, p)

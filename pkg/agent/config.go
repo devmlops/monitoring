@@ -3,8 +3,8 @@ package agent
 import "sync"
 
 type Params struct {
-    UseWg  bool
-    Wg     *sync.WaitGroup
+	UseWg bool
+	Wg    *sync.WaitGroup
 }
 
-var Debug bool = false
+var Debug bool = true

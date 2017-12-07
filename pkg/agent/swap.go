@@ -74,6 +74,9 @@ func (s *Swap) GetSwapUsageByProcess() {
 		numbers = append(numbers, int(val))
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(numbers)))
+	if len(numbers) > 5 {
+		numbers = numbers[:5]
+	}
 	for _, number := range numbers {
 		for _, p := range reversed_freq[uint64(number)] {
 			s.SwapByProcess = append(s.SwapByProcess, p)

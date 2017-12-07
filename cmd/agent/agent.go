@@ -13,11 +13,11 @@ func main() {
 	network := agent.Network{}
 	disk := agent.Disk{}
 	var wg sync.WaitGroup
-	
+
 	if agent.Debug == true {
 		wg.Add(5)
 		p := agent.Params{UseWg: true, Wg: &wg}
-		
+
 		go cpu.RunJob(&p)
 		go memory.RunJob(&p)
 		go swap.RunJob(&p)
@@ -28,7 +28,7 @@ func main() {
 	} else {
 		for {
 			p := agent.Params{UseWg: false, Wg: &wg}
-			
+
 			go cpu.RunJob(&p)
 			go memory.RunJob(&p)
 			go swap.RunJob(&p)

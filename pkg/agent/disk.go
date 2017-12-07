@@ -10,10 +10,10 @@ import (
 )
 
 type Disk struct {
-	Time              time.Time       `json:"time"`
-	DiskTotalKB     uint64          `json:"disk_total_kb"`
-	DiskUsedKB      uint64          `json:"disk_used_kb"`
-	DiskUsedPercent float64         `json:"disk_used_percent"`
+	Time            time.Time `json:"time"`
+	DiskTotalKB     uint64    `json:"disk_total_kb"`
+	DiskUsedKB      uint64    `json:"disk_used_kb"`
+	DiskUsedPercent float64   `json:"disk_used_percent"`
 }
 
 func (d *Disk) RunJob(p *Params) {
@@ -29,11 +29,11 @@ func (d *Disk) GetDiskUsage() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	d.DiskTotalKB = stat.Total / 1024
 	d.DiskUsedKB = stat.Used / 1024
 	d.DiskUsedPercent = stat.UsedPercent
-	
+
 	if Debug == true {
 		ser, err := json.Marshal(d)
 		if err != nil {

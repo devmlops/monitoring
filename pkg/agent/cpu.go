@@ -68,6 +68,9 @@ func (c *CPU) GetCPUUsageByProcess() {
 		numbers = append(numbers, val)
 	}
 	sort.Sort(sort.Reverse(sort.Float64Slice(numbers)))
+	if len(numbers) > 5 {
+		numbers = numbers[:5]
+	}
 	for _, number := range numbers {
 		for _, p := range reversed_freq[number] {
 			c.CPUByProcess = append(c.CPUByProcess, p)
