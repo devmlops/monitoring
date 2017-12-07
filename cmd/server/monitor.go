@@ -4,7 +4,6 @@ import (
 	"sync"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"fmt"
 )
 
 type Monitor struct {
@@ -16,7 +15,7 @@ type Monitor struct {
 type Store struct {
 	netData  []agent.Network
 	memData  []agent.Memory
-	swData   []agent.Swap
+	swapData   []agent.Swap
 	cpuData  []agent.CPU
 	diskData []agent.Disk
 
@@ -31,54 +30,58 @@ type Store struct {
 type Status struct {
 	netStatus  bool
 	memStatus  bool
-	swStatus   bool
+	swapStatus bool
 	cpuStatus  bool
 	diskStatus bool
 
 	netCounter  int
 	memCounter  int
-	swCounter   int
+	swapCounter int
 	cpuCounter  int
 	diskCounter int
 }
 
 type Avarage struct {
-	netAverage  float64
-	memAverage  float64
-	swAverage   float64
+	netAverage  uint64
+	memAverage  uint64
+	swapAverage uint64
 	cpuAverage  float64
-	diskAverage float64
+	diskAverage uint64
 }
 
 func (m *Monitor) AddNetwork(n agent.Network) {
 	m.store.mu.Lock()
 	m.store.netData = append(m.store.netData, n)
+	m.store.avarage.netAverage += n.Connections
 	m.store.mu.Unlock()
-	//m.AnalyseNetwork(n)
+	m.AnalyseNetwork(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
 func (m *Monitor) AddMemory(n agent.Memory) {
 	m.store.mu.Lock()
 	m.store.memData = append(m.store.memData, n)
+	m.store.avarage.memAverage += n.MemoryUsedKB
 	m.store.mu.Unlock()
-	//go m.Monitor
+	m.AnalyseMemory(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
 func (m *Monitor) AddSwap(n agent.Swap) {
 	m.store.mu.Lock()
-	m.store.swData = append(m.store.swData, n)
+	m.store.swapData = append(m.store.swapData, n)
+	m.store.avarage.swapAverage += n.SwapUsedKB
 	m.store.mu.Unlock()
-	//go m.Monitor
+	m.AnalyseSwap(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
 func (m *Monitor) AddDisk(n agent.Disk) {
 	m.store.mu.Lock()
 	m.store.diskData = append(m.store.diskData, n)
+	m.store.avarage.diskAverage += n.DiskUsedKB
 	m.store.mu.Unlock()
-	//go m.Monitor
+	m.AnalyseDisk(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -92,10 +95,189 @@ func (m *Monitor) AddCPU(n agent.CPU) {
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
+func (m *Monitor) AnalyseNetwork(n agent.Network) {
+	m.store.mu.Lock()
+	result := float64(m.store.avarage.netAverage) / float64(len(m.store.netData))
+	// +20%
+	if float64(n.Connections) > float64(result*1.2) {
+		if n.Connections >= m.config.Network.MaxLimit && m.store.Danger.netStatus == false {
+			// check danger
+			if m.store.Danger.netCounter == 3 && m.store.Danger.netStatus != true {
+				m.store.Warning.netStatus = true
+				m.store.Danger.netStatus = true
+				m.store.Warning.netCounter = 3
+				//fmt.Println("Allert Danger")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+			} else {
+				m.store.Danger.netCounter += 1
+			}
+		} else {
+			// check warning
+			if m.store.Warning.netCounter == 3 && m.store.Warning.netStatus != true {
+				m.store.Warning.netStatus = true
+				//fmt.Println("Allert Warning")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+			} else {
+				m.store.Warning.netCounter += 1
+			}
+		}
+	} else {
+		// normalization
+		if m.store.Danger.netCounter != 0 {
+			m.store.Danger.netCounter -= 1
+		}
+		if m.store.Warning.netCounter != 0 {
+			m.store.Warning.netCounter -= 1
+		}
+		if m.store.Warning.netStatus == true && m.store.Danger.netCounter == 0 && m.store.Warning.netCounter == 0 {
+			//fmt.Println("All good")
+			m.store.Danger.netStatus = false
+			m.store.Warning.netStatus = false
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+		}
+	}
+	m.store.mu.Unlock()
+}
+
+func (m *Monitor) AnalyseMemory(n agent.Memory) {
+	m.store.mu.Lock()
+	result := float64(m.store.avarage.memAverage) / float64(len(m.store.memData))
+	// +20%
+	if float64(n.MemoryUsedKB) > result*1.2 {
+		if n.MemoryUsedKB >= m.config.Memory.MaxLimit && m.store.Danger.memStatus == false {
+			// check danger
+			if m.store.Danger.memCounter == 3 && m.store.Danger.memStatus != true {
+				m.store.Warning.memStatus = true
+				m.store.Danger.memStatus = true
+				m.store.Warning.memCounter = 3
+				//fmt.Println("Allert Danger")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+			} else {
+				m.store.Danger.memCounter += 1
+			}
+		} else {
+			// check warning
+			if m.store.Warning.memCounter == 3 && m.store.Warning.memStatus != true {
+				m.store.Warning.memStatus = true
+				//fmt.Println("Allert Warning")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+			} else {
+				m.store.Warning.memCounter += 1
+			}
+		}
+	} else {
+		// normalization
+		if m.store.Danger.memCounter != 0 {
+			m.store.Danger.memCounter -= 1
+		}
+		if m.store.Warning.memCounter != 0 {
+			m.store.Warning.memCounter -= 1
+		}
+		if m.store.Warning.memStatus == true && m.store.Danger.memCounter == 0 && m.store.Warning.memCounter == 0 {
+			//fmt.Println("All good")
+			m.store.Danger.memStatus = false
+			m.store.Warning.memStatus = false
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+		}
+	}
+	m.store.mu.Unlock()
+}
+
+func (m *Monitor) AnalyseSwap(n agent.Swap) {
+	m.store.mu.Lock()
+	result := float64(m.store.avarage.swapAverage) / float64(len(m.store.swapData))
+	// +20%
+	if float64(n.SwapUsedKB) > result*1.2 {
+		if n.SwapUsedKB >= m.config.Swap.MaxLimit && m.store.Danger.swapStatus == false {
+			// check danger
+			if m.store.Danger.swapCounter == 3 && m.store.Danger.swapStatus != true {
+				m.store.Warning.swapStatus = true
+				m.store.Danger.swapStatus = true
+				m.store.Warning.swapCounter = 3
+				//fmt.Println("Allert Danger")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+			} else {
+				m.store.Danger.swapCounter += 1
+			}
+		} else {
+			// check warning
+			if m.store.Warning.swapCounter == 3 && m.store.Warning.swapStatus != true {
+				m.store.Warning.swapStatus = true
+				//fmt.Println("Allert Warning")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+			} else {
+				m.store.Warning.swapCounter += 1
+			}
+		}
+	} else {
+		// normalization
+		if m.store.Danger.swapCounter != 0 {
+			m.store.Danger.swapCounter -= 1
+		}
+		if m.store.Warning.swapCounter != 0 {
+			m.store.Warning.swapCounter -= 1
+		}
+		if m.store.Warning.swapStatus == true && m.store.Danger.swapCounter == 0 && m.store.Warning.swapCounter == 0 {
+			//fmt.Println("All good")
+			m.store.Danger.swapStatus = false
+			m.store.Warning.swapStatus = false
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+		}
+	}
+	m.store.mu.Unlock()
+}
+
+func (m *Monitor) AnalyseDisk(n agent.Disk) {
+	m.store.mu.Lock()
+	result := float64(m.store.avarage.diskAverage) / float64(len(m.store.diskData))
+	// +20%
+	if float64(n.DiskUsedKB) > result*1.2 {
+		if n.DiskUsedKB >= m.config.Disk.MaxLimit && m.store.Danger.diskStatus == false {
+			// check danger
+			if m.store.Danger.diskCounter == 3 && m.store.Danger.diskStatus != true {
+				m.store.Warning.diskStatus = true
+				m.store.Danger.diskStatus = true
+				m.store.Warning.diskCounter = 3
+				//fmt.Println("Allert Danger")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+			} else {
+				m.store.Danger.diskCounter += 1
+			}
+		} else {
+			// check warning
+			if m.store.Warning.diskCounter == 3 && m.store.Warning.diskStatus != true {
+				m.store.Warning.diskStatus = true
+				//fmt.Println("Allert Warning")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+			} else {
+				m.store.Warning.diskCounter += 1
+			}
+		}
+	} else {
+		// normalization
+		if m.store.Danger.diskCounter != 0 {
+			m.store.Danger.diskCounter -= 1
+		}
+		if m.store.Warning.diskCounter != 0 {
+			m.store.Warning.diskCounter -= 1
+		}
+		if m.store.Warning.diskStatus == true && m.store.Danger.diskCounter == 0 && m.store.Warning.diskCounter == 0 {
+			//fmt.Println("All good")
+			m.store.Danger.diskStatus = false
+			m.store.Warning.diskStatus = false
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+		}
+	}
+	m.store.mu.Unlock()
+}
+
 func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	result := m.store.avarage.cpuAverage / float64(len(m.store.netData))
-	m.store.mu.Unlock()
 	// +20%
 	if n.CPUUsedPercent > result*1.2 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
@@ -105,7 +287,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Danger.cpuStatus = true
 				m.store.Warning.cpuCounter = 3
 				//fmt.Println("Allert Danger")
-				SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
 			} else {
 				m.store.Danger.cpuCounter += 1
 			}
@@ -114,7 +296,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 			if m.store.Warning.cpuCounter == 3 && m.store.Warning.cpuStatus != true {
 				m.store.Warning.cpuStatus = true
 				//fmt.Println("Allert Warning")
-				SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
 				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
 			} else {
 				m.store.Warning.cpuCounter += 1
@@ -132,15 +314,10 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 			//fmt.Println("All good")
 			m.store.Danger.cpuStatus = false
 			m.store.Warning.cpuStatus = false
-			SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
 		}
 	}
-}
-
-func (m *Monitor) AnalyseMemory(n agent.Memory) {
-	//fmt.Println(n.Time)
-	//mean := GetMean()
-	fmt.Println(m.store.netData[len(m.store.netData)-1].Connections)
+	m.store.mu.Unlock()
 }
 
 //

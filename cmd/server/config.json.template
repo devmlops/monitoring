@@ -18,5 +18,9 @@
   "cpu": {
     "max": 100,
     "maxLimit": 75
+  },
+  "disk": {
+    "max": 100,
+    "maxLimit": 75
   }
 }

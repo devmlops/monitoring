@@ -12,6 +12,7 @@ type Config struct {
 	Memory      MemoryConfig
 	Swap        SwapConfig
 	CPU         CpuConfig
+	Disk        DiskConfig
 }
 
 type TelegramConfig struct {
@@ -35,6 +36,11 @@ type SwapConfig struct {
 }
 
 type CpuConfig struct {
+	Max      uint64
+	MaxLimit uint64
+}
+
+type DiskConfig struct {
 	Max      uint64
 	MaxLimit uint64
 }
