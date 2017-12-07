@@ -1,13 +1,12 @@
 package agent
 
 import (
-	//"log"
-	"sort"
+	"log"
 	"fmt"
+	"sort"
 	"time"
 	"sync"
 	"bytes"
-	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
@@ -36,7 +35,10 @@ func (m *Memory) RunJob(wg *sync.WaitGroup) {
 
 func (m *Memory) GetMemoryUsageTotal() {
 	m.Time = time.Now().UTC()
-	stat, _ := mem.VirtualMemory()
+	stat, err := mem.VirtualMemory()
+	if err != nil {
+		log.Fatal(err)
+	}
 	m.MemoryTotalKB = stat.Total / 1024
 	m.MemoryUsedKB = stat.Used / 1024
 	m.MemoryUsedPercent = stat.UsedPercent
@@ -47,10 +49,19 @@ func (m *Memory) GetMemoryUsageByProcess() {
 	
 	ps, _ := process.Processes()
 	for _, proc := range ps {
-		memPercent, _ := proc.MemoryPercent()
-		stat, _ := proc.MemoryInfo()
+		memPercent, err := proc.MemoryPercent()
+		if err != nil {
+			log.Fatal(err)
+		}
+		stat, err := proc.MemoryInfo()
+		if err != nil {
+			log.Fatal(err)
+		}
 		if stat.RSS > 0 {
-			name, _ := proc.Name()
+			name, err := proc.Name()
+			if err != nil {
+				log.Fatal(err)
+			}
 			p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS / 1024}
 			reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
 		}
@@ -67,11 +78,17 @@ func (m *Memory) GetMemoryUsageByProcess() {
 		}
 	}
 	
-	ser, _ := json.Marshal(m)
+	ser, err := json.Marshal(m)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)
-	res, _ := http.Post("http://192.168.88.141:8080/memory", "application/json; charset=utf-8", b)
+	res, err := client.Post("http://192.168.88.141:8080/memory", "application/json; charset=utf-8", b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(res)
 }

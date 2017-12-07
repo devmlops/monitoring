@@ -7,7 +7,6 @@ import (
 	"sync"
 	"sort"
 	"bytes"
-	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/process"
@@ -52,9 +51,14 @@ func (c *CPU) GetCPUUsageByProcess() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		name, _ := pid.Name()
-		p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
-		reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+		if cpuPercent > 0 {
+			name, err := pid.Name()
+			if err != nil {
+				log.Fatal(err)
+			}
+			p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
+			reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+		}
 		
 	}
 	
@@ -77,7 +81,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
-	res, err := http.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
+	res, err := client.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
 	if err != nil {
 		log.Fatal(err)
 	}

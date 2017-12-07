@@ -1,12 +1,12 @@
 package agent
 
 import (
-	"sort"
+	"log"
 	"fmt"
+	"sort"
 	"time"
 	"sync"
 	"bytes"
-	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
@@ -35,7 +35,10 @@ func (s *Swap) RunJob(wg *sync.WaitGroup) {
 
 func (s *Swap) GetSwapUsageTotal() {
 	s.Time = time.Now().UTC()
-	stat, _ := mem.SwapMemory()
+	stat, err := mem.SwapMemory()
+	if err != nil {
+		log.Fatal(err)
+	}
 	s.SwapTotalKB = stat.Total / 1024
 	s.SwapUsedKB = stat.Used / 1024
 	s.SwapUsedPercent = stat.UsedPercent
@@ -44,12 +47,21 @@ func (s *Swap) GetSwapUsageTotal() {
 func (s *Swap) GetSwapUsageByProcess() {
 	reversed_freq := map[uint64][]ProcessSwap{}
 	
-	ps, _ := process.Processes()
+	ps, err := process.Processes()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, proc := range ps {
-		stat, _ := proc.MemoryInfo()
+		stat, err := proc.MemoryInfo()
+		if err != nil {
+			log.Fatal(err)
+		}
 		if stat.Swap > 0 {
 			used := stat.Swap / 1024
-			name, _ := proc.Name()
+			name, err := proc.Name()
+			if err != nil {
+				log.Fatal(err)
+			}
 			swapPercent := float64(used) / float64(s.SwapTotalKB) * 100
 			p := ProcessSwap{Name: name, Pid: proc.Pid, SwapUsedPercent: swapPercent, SwapUsedKB: used}
 			reversed_freq[p.SwapUsedKB] = append(reversed_freq[p.SwapUsedKB], p)
@@ -67,12 +79,18 @@ func (s *Swap) GetSwapUsageByProcess() {
 		}
 	}
 	
-	ser, _ := json.Marshal(s)
+	ser, err := json.Marshal(s)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(s)
-	res, _ := http.Post("http://192.168.88.141:8080/swap", "application/json; charset=utf-8", b)
+	res, err := client.Post("http://192.168.88.141:8080/swap", "application/json; charset=utf-8", b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(res)
 }
 

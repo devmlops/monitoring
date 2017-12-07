@@ -1,13 +1,12 @@
 package agent
 
 import (
-	"sort"
-	//	"log"
+	"log"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 	"bytes"
-	"net/http"
 	"encoding/json"
 	"github.com/shirou/gopsutil/net"
 )
@@ -31,7 +30,10 @@ func (n *Network) RunJob(wg *sync.WaitGroup) {
 func (n *Network) GetActiveConnections() {
 	n.Time = time.Now().UTC()
 
-	cs, _ := net.Connections("tcp")
+	cs, err := net.Connections("tcp")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	freq := make(map[string]int)
 	for _, conn := range cs {
@@ -61,11 +63,17 @@ func (n *Network) GetActiveConnections() {
 			n.Connections += number
 		}
 	}
-	ser, _ := json.Marshal(n)
+	ser, err := json.Marshal(n)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)
-	res, _ := http.Post("http://192.168.88.141:8080/network", "application/json; charset=utf-8", b)
+	res, err := client.Post("http://192.168.88.141:8080/network", "application/json; charset=utf-8", b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(res)
 }
