@@ -17,8 +17,9 @@ type Swap struct {
 	SwapUsedKB      uint64        `json:"swap_used_kb"`
 	SwapUsedPercent float64       `json:"swap_used_percent"`
 	SwapByProcess   []ProcessSwap `json:"swap_by_process"`
-	Server Server
-	Debug bool
+	Server          Server        `json:"server"`
+	Debug           bool          `json:"debug"`
+	HostName        string        `json:"hostname"`
 }
 
 type ProcessSwap struct {

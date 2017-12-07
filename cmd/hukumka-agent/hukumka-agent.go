@@ -1,17 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"sync"
 	"time"
-	"fmt"
 )
 
 func main() {
 	config := OpenConfig("config.json")
 	debug := config.Debug
 	server := config.Server
-	
+
 	cpu := agent.CPU{Server: server, Debug: debug}
 	memory := agent.Memory{Server: server, Debug: debug}
 	swap := agent.Swap{Server: server, Debug: debug}

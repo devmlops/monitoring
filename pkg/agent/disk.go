@@ -14,8 +14,9 @@ type Disk struct {
 	DiskTotalKB     uint64    `json:"disk_total_kb"`
 	DiskUsedKB      uint64    `json:"disk_used_kb"`
 	DiskUsedPercent float64   `json:"disk_used_percent"`
-	Server Server
-	Debug bool
+	Server          Server    `json:"server"`
+	Debug           bool      `json:"debug"`
+	HostName        string    `json:"hostname"`
 }
 
 func (d *Disk) RunJob(p *Params) {

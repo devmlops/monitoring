@@ -17,8 +17,9 @@ type Memory struct {
 	MemoryUsedKB      uint64          `json:"memory_used_kb"`
 	MemoryUsedPercent float64         `json:"memory_used_percent"`
 	MemoryByProcess   []ProcessMemory `json:"memory_by_process"`
-	Server Server
-	Debug bool
+	Server            Server          `json:"server"`
+	Debug             bool            `json:"debug"`
+	HostName          string          `json:"hostname"`
 }
 
 type ProcessMemory struct {

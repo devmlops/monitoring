@@ -14,8 +14,9 @@ type Network struct {
 	Time            time.Time    `json:"time"`
 	Connections     uint64       `json:"connections"`
 	ConnectionsByIP []Connection `json:"connections_by_ip"`
-	Server Server
-	Debug bool
+	Server          Server       `json:"server"`
+	Debug           bool         `json:"debug"`
+	HostName        string       `json:"hostname"`
 }
 
 type Connection struct {
