@@ -20,23 +20,23 @@ type TelegramConfig struct {
 }
 
 type NetworkConfig struct {
-	Max      int
-	MaxLimit int
+	Max      uint64
+	MaxLimit uint64
 }
 
 type MemoryConfig struct {
-	Max      int
-	MaxLimit int
+	Max      uint64
+	MaxLimit uint64
 }
 
 type SwapConfig struct {
-	Max      int
-	MaxLimit int
+	Max      uint64
+	MaxLimit uint64
 }
 
 type CpuConfig struct {
-	Max      int
-	MaxLimit int
+	Max      uint64
+	MaxLimit uint64
 }
 
 func OpenConfig(path string) Config {

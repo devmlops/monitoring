@@ -54,7 +54,7 @@ func Swap(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.Swap
 		err := c.ShouldBindJSON(&request)
-		if err == nil {
+		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "ooops. I'm sorry =(",
 			})
@@ -71,8 +71,10 @@ func CPU(data *Monitor) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request agent.CPU
 		err := c.ShouldBindJSON(&request)
-		if err == nil {
-			fmt.Printf("%#v\n", request)
+		if err != nil {
+			//fmt.Println(">>>>>>>> %s", err)
+			//fmt.Println("<<<<<<<<<")
+			//fmt.Printf("%#v\n", request)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "ooops. I'm sorry =(",
 			})
