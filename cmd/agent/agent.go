@@ -8,13 +8,13 @@ import (
 func main() {
 	var wg sync.WaitGroup
 
-	wg.Add(1)
+	wg.Add(4)
 
-	//cpu := agent.CPU{}
-	//go cpu.RunJob(&wg)
+	cpu := agent.CPU{}
+	go cpu.RunJob(&wg)
 	
-	//memory := agent.Memory{}
-	//go memory.RunJob(&wg)
+	memory := agent.Memory{}
+	go memory.RunJob(&wg)
 	
 	swap := agent.Swap{}
 	go swap.RunJob(&wg)
@@ -22,8 +22,8 @@ func main() {
 	//disk := agent.Disk{}
 	//go disk.RunJob(&wg)
 
-	//network := agent.Network{}
-	//go network.RunJob(&wg)
+	network := agent.Network{}
+	go network.RunJob(&wg)
 	
 	wg.Wait()
 }

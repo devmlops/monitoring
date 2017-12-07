@@ -63,15 +63,19 @@ func (n *Network) GetActiveConnections() {
 			n.Connections += number
 		}
 	}
-	ser, err := json.Marshal(n)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(ser))
+	//ser, err := json.Marshal(n)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)
-	res, err := client.Post("http://192.168.88.141:8080/network", "application/json; charset=utf-8", b)
+	res, err := client.Post(
+		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "network"),
+		"application/json; charset=utf-8",
+		b,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

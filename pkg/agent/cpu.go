@@ -73,15 +73,19 @@ func (c *CPU) GetCPUUsageByProcess() {
 		}
 	}
 	
-	ser, err := json.Marshal(c)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(ser))
+	//ser, err := json.Marshal(c)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
-	res, err := client.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
+	res, err := client.Post(
+		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "cpu"),
+		"application/json; charset=utf-8",
+		b,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
