@@ -14,6 +14,9 @@ type Network struct {
 	Time            time.Time    `json:"time"`
 	Connections     uint64       `json:"connections"`
 	ConnectionsByIP []Connection `json:"connections_by_ip"`
+	Server          Server        `json:"-"`
+	Debug           bool          `json:"-"`
+	Hostname        string        `json:"hostname"`
 }
 
 type Connection struct {
@@ -29,6 +32,7 @@ func (n *Network) RunJob(p *Params) {
 }
 
 func (n *Network) GetActiveConnections() {
+	n.ConnectionsByIP = nil
 	n.Time = time.Now().UTC()
 
 	cs, err := net.Connections("tcp")
@@ -68,9 +72,7 @@ func (n *Network) GetActiveConnections() {
 		}
 	}
 
-	//n.Connections += 30
-
-	if Debug == true {
+	if n.Debug == true {
 		ser, err := json.Marshal(n)
 		if err != nil {
 			log.Println(err)
@@ -81,7 +83,7 @@ func (n *Network) GetActiveConnections() {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)
 	res, err := client.Post(
-		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "network"),
+		fmt.Sprintf("http://%s:%s/%s", n.Server.IP, n.Server.Port, "network"),
 		"application/json; charset=utf-8",
 		b,
 	)

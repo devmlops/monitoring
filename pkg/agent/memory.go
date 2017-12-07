@@ -17,6 +17,9 @@ type Memory struct {
 	MemoryUsedKB      uint64          `json:"memory_used_kb"`
 	MemoryUsedPercent float64         `json:"memory_used_percent"`
 	MemoryByProcess   []ProcessMemory `json:"memory_by_process"`
+	Server          Server        `json:"-"`
+	Debug           bool          `json:"-"`
+	Hostname        string        `json:"hostname"`
 }
 
 type ProcessMemory struct {
@@ -46,6 +49,7 @@ func (m *Memory) GetMemoryUsageTotal() {
 }
 
 func (m *Memory) GetMemoryUsageByProcess() {
+	m.MemoryByProcess = nil
 	reversed_freq := map[uint64][]ProcessMemory{}
 
 	ps, _ := process.Processes()
@@ -82,7 +86,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 		}
 	}
 
-	if Debug == true {
+	if m.Debug == true {
 		ser, err := json.Marshal(m)
 		if err != nil {
 			log.Println(err)
@@ -93,7 +97,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)
 	res, err := client.Post(
-		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "memory"),
+		fmt.Sprintf("http://%s:%s/%s", m.Server.IP, m.Server.Port, "memory"),
 		"application/json; charset=utf-8",
 		b,
 	)

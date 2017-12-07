@@ -14,6 +14,9 @@ type Disk struct {
 	DiskTotalKB     uint64    `json:"disk_total_kb"`
 	DiskUsedKB      uint64    `json:"disk_used_kb"`
 	DiskUsedPercent float64   `json:"disk_used_percent"`
+	Server          Server        `json:"-"`
+	Debug           bool          `json:"-"`
+	Hostname        string        `json:"hostname"`
 }
 
 func (d *Disk) RunJob(p *Params) {
@@ -34,7 +37,7 @@ func (d *Disk) GetDiskUsage() {
 	d.DiskUsedKB = stat.Used / 1024
 	d.DiskUsedPercent = stat.UsedPercent
 
-	if Debug == true {
+	if d.Debug == true {
 		ser, err := json.Marshal(d)
 		if err != nil {
 			log.Println(err)
@@ -45,7 +48,7 @@ func (d *Disk) GetDiskUsage() {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(d)
 	res, err := client.Post(
-		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "disk"),
+		fmt.Sprintf("http://%s:%s/%s", d.Server.IP, d.Server.Port, "disk"),
 		"application/json; charset=utf-8",
 		b,
 	)
