@@ -1,30 +1,30 @@
 package agent
 
 import (
-	"bytes"
-	"encoding/json"
+	"sort"
 	"fmt"
-	"log"
-	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 	"sync"
+	//"bytes"
+	//"net/http"
+	"encoding/json"
+	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/process"
 )
 
 type Swap struct {
 	Time            time.Time     `json:"time"`
-	SwapTotalKB     int           `json:"swap_total_kb"`
-	SwapUsedKB      int           `json:"swap_used_kb"`
-	SwapUsedPercent float32       `json:"swap_used_percent"`
+	SwapTotalKB     uint64           `json:"swap_total_kb"`
+	SwapUsedKB      uint64           `json:"swap_used_kb"`
+	SwapUsedPercent float64       `json:"swap_used_percent"`
 	SwapByProcess   []ProcessSwap `json:"swap_by_process"`
 }
 
 type ProcessSwap struct {
-	PID         int     `json:"pid"`
+	Pid         int32     `json:"pid"`
 	Name        string  `json:"name"`
-	SwapKB      int     `json:"swap_kb"`
-	SwapPercent float32 `json:"swap_percent"`
+	SwapUsedKB      uint64     `json:"swap_kb"`
+	SwapUsedPercent float64 `json:"swap_percent"`
 }
 
 func (s *Swap) RunJob(wg *sync.WaitGroup) {
@@ -33,64 +33,48 @@ func (s *Swap) RunJob(wg *sync.WaitGroup) {
 	s.GetSwapUsageByProcess()
 }
 
-func (s *Swap) GetSwapUsageByProcess() {
-	s.Time = time.Now().UTC()
-	swapCmd := `for file in /proc/*/status ; do awk '/^Pid|VmSwap|Name/{printf $2 " "}END{ print ""}' $file; done | sort -k 3 -n -r`
-	cmd := exec.Command(
-		"/bin/bash",
-		"-c",
-		swapCmd,
-	)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	lines := strings.Split(out.String(), "\n")
-	for _, line := range lines {
-		perProcess := strings.Fields(line)
-		if len(perProcess) > 2 {
-			PID, err := strconv.Atoi(perProcess[1])
-			if err != nil {
-				log.Fatal(err)
-			}
-			swap, err := strconv.Atoi(perProcess[2])
-			if err != nil {
-				log.Fatal(err)
-			}
-			if swap > 0 {
-				p := ProcessSwap{Name: perProcess[0], PID: PID, SwapKB: swap}
-				p.SwapPercent = float32(p.SwapKB) / float32(s.SwapTotalKB) * 100.0
-				s.SwapByProcess = append(s.SwapByProcess, p)
-			}
-		}
-	}
-	ser, err := json.Marshal(s)
-	fmt.Println(string(ser))
+func (s *Swap) GetSwapUsageTotal() {
+	stat, _ := mem.VirtualMemory()
+	s.SwapTotalKB = stat.Total / 1024
+	s.SwapUsedKB = stat.Used / 1024
+	s.SwapUsedPercent = stat.UsedPercent
+	//fmt.Println(s)
 }
 
-func (s *Swap) GetSwapUsageTotal() {
-	swapCmd := `cat /proc/swaps | tail -n1`
-	cmd := exec.Command(
-		"/bin/bash",
-		"-c",
-		swapCmd,
-	)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
+func (s *Swap) GetSwapUsageByProcess() {
+	s.Time = time.Now().UTC()
+	
+	reversed_freq := map[uint64][]ProcessSwap{}
+	
+	ps, _ := process.Processes()
+	for _, proc := range ps {
+		stat, _ := proc.MemoryInfo()
+		fmt.Println(stat.Swap)
+		used := stat.Swap/1024
+		name, _ := proc.Name()
+		swapPercent := float64(used) /  float64(s.SwapTotalKB) * 100
+		p := ProcessSwap{Name: name, Pid: proc.Pid, SwapUsedPercent: swapPercent, SwapUsedKB: used}
+		reversed_freq[p.SwapUsedKB] = append(reversed_freq[p.SwapUsedKB], p)
 	}
-	swap := strings.Fields(out.String())
-	s.SwapTotalKB, err = strconv.Atoi(swap[2])
-	if err != nil {
-		log.Fatal(err)
+	
+	var numbers []int
+	for val := range reversed_freq {
+		numbers = append(numbers, int(val))
 	}
-	s.SwapUsedKB, err = strconv.Atoi(swap[3])
-	if err != nil {
-		log.Fatal(err)
+	sort.Sort(sort.Reverse(sort.IntSlice(numbers)))
+	for _, number := range numbers {
+		for _, p := range reversed_freq[uint64(number)] {
+			s.SwapByProcess = append(s.SwapByProcess, p)
+		}
 	}
-	s.SwapUsedPercent = float32(s.SwapUsedKB) / float32(s.SwapTotalKB) * 100.0
+	
+	ser, _ := json.Marshal(s)
+	fmt.Println(string(ser))
+	
+	//b := new(bytes.Buffer)
+	//json.NewEncoder(b).Encode(s)
+	//res, _ := http.Post("http://192.168.88.141:8080/memory", "application/json; charset=utf-8", b)
+	//fmt.Println(res)
 }
+
+

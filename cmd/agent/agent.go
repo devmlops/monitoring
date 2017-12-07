@@ -16,11 +16,11 @@ func main() {
 	//network := agent.Network{}
 	//go network.RunJob(&wg)
 
-	//swap := agent.Swap{}
-	//go swap.RunJob(&wg)
+	swap := agent.Swap{}
+	go swap.RunJob(&wg)
 
-	memory := agent.Memory{}
-	go memory.RunJob(&wg)
+	//memory := agent.Memory{}
+	//go memory.RunJob(&wg)
 	
 	wg.Wait()
 }
