@@ -38,7 +38,7 @@ func (m *Memory) GetMemoryUsageTotal() {
 	m.Time = time.Now().UTC()
 	stat, err := mem.VirtualMemory()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	m.MemoryTotalKB = stat.Total / 1024
 	m.MemoryUsedKB = stat.Used / 1024
@@ -52,16 +52,16 @@ func (m *Memory) GetMemoryUsageByProcess() {
 	for _, proc := range ps {
 		memPercent, err := proc.MemoryPercent()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		stat, err := proc.MemoryInfo()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		if stat.RSS > 0 {
 			name, err := proc.Name()
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 			p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS / 1024}
 			reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
@@ -85,7 +85,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 	if Debug == true {
 		ser, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		fmt.Println(string(ser))
 	}
@@ -98,7 +98,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 		b,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println(res)
 }

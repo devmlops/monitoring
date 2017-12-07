@@ -27,7 +27,7 @@ func (d *Disk) GetDiskUsage() {
 	d.Time = time.Now().UTC()
 	stat, err := disk.Usage("/")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	d.DiskTotalKB = stat.Total / 1024
@@ -37,7 +37,7 @@ func (d *Disk) GetDiskUsage() {
 	if Debug == true {
 		ser, err := json.Marshal(d)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		fmt.Println(string(ser))
 	}
@@ -50,7 +50,7 @@ func (d *Disk) GetDiskUsage() {
 		b,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println(res)
 }

@@ -8,6 +8,7 @@ import (
 	"log"
 	"sort"
 	"time"
+	//nnn "net"
 )
 
 type Network struct {
@@ -33,7 +34,7 @@ func (n *Network) GetActiveConnections() {
 
 	cs, err := net.Connections("tcp")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	freq := make(map[string]int)
@@ -73,7 +74,7 @@ func (n *Network) GetActiveConnections() {
 	if Debug == true {
 		ser, err := json.Marshal(n)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		fmt.Println(string(ser))
 	}
@@ -86,7 +87,7 @@ func (n *Network) GetActiveConnections() {
 		b,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println(res)
 }

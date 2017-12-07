@@ -35,7 +35,7 @@ func (c *CPU) GetCPUUsageTotal() {
 	c.Time = time.Now().UTC()
 	cpuUsage, err := cpu.Percent(time.Duration(1)*time.Second, false)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	c.CPUUsedPercent = cpuUsage[0]
 }
@@ -45,17 +45,17 @@ func (c *CPU) GetCPUUsageByProcess() {
 
 	ps, err := process.Processes()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	for _, pid := range ps {
 		cpuPercent, err := pid.CPUPercent()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		if cpuPercent > 0 {
 			name, err := pid.Name()
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 			p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
 			reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
@@ -80,7 +80,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 	if Debug == true {
 		ser, err := json.Marshal(c)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		fmt.Println(string(ser))
 	}
@@ -93,7 +93,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 		b,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println(res)
 }

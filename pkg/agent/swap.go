@@ -38,7 +38,7 @@ func (s *Swap) GetSwapUsageTotal() {
 	s.Time = time.Now().UTC()
 	stat, err := mem.SwapMemory()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	s.SwapTotalKB = stat.Total / 1024
 	s.SwapUsedKB = stat.Used / 1024
@@ -50,18 +50,18 @@ func (s *Swap) GetSwapUsageByProcess() {
 
 	ps, err := process.Processes()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	for _, proc := range ps {
 		stat, err := proc.MemoryInfo()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		if stat.Swap > 0 {
 			used := stat.Swap / 1024
 			name, err := proc.Name()
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 			swapPercent := float64(used) / float64(s.SwapTotalKB) * 100
 			p := ProcessSwap{Name: name, Pid: proc.Pid, SwapUsedPercent: swapPercent, SwapUsedKB: used}
@@ -86,7 +86,7 @@ func (s *Swap) GetSwapUsageByProcess() {
 	if Debug == true {
 		ser, err := json.Marshal(s)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		fmt.Println(string(ser))
 	}
@@ -99,7 +99,7 @@ func (s *Swap) GetSwapUsageByProcess() {
 		b,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println(res)
 }
