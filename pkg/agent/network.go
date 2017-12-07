@@ -13,13 +13,13 @@ import (
 
 type Network struct {
 	Time            time.Time    `json:"time"`
-	Connections     int          `json:"connections"`
+	Connections     uint64          `json:"connections"`
 	ConnectionsByIP []Connection `json:"connections_by_ip"`
 }
 
 type Connection struct {
 	IPAddress string `json:"ip_address"`
-	Number    int    `json:"number"`
+	Number    uint64    `json:"number"`
 }
 
 func (n *Network) RunJob(wg *sync.WaitGroup) {
@@ -58,9 +58,9 @@ func (n *Network) GetActiveConnections() {
 	sort.Sort(sort.Reverse(sort.IntSlice(numbers)))
 	for _, number := range numbers {
 		for _, s := range reversed_freq[number] {
-			c := Connection{IPAddress: s, Number: number}
+			c := Connection{IPAddress: s, Number: uint64(number)}
 			n.ConnectionsByIP = append(n.ConnectionsByIP, c)
-			n.Connections += number
+			n.Connections += uint64(number)
 		}
 	}
 	//ser, err := json.Marshal(n)

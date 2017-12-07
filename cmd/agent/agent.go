@@ -3,27 +3,40 @@ package main
 import (
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"sync"
+	//"fmt"
+	"time"
 )
 
 func main() {
-	var wg sync.WaitGroup
-
-	wg.Add(4)
-
-	cpu := agent.CPU{}
-	go cpu.RunJob(&wg)
-
-	memory := agent.Memory{}
-	go memory.RunJob(&wg)
-
+	//cpu := agent.CPU{}
+	//memory := agent.Memory{}
 	//swap := agent.Swap{}
-	//go swap.RunJob(&wg)
+	//network := agent.Network{}
+	disk := agent.Disk{}
+	
+	if agent.Debug == true {
+		var wg sync.WaitGroup
+		
+		wg.Add(1)
+		
+		p := agent.Params{UseWg: true, Wg: &wg}
+		
+		//go cpu.RunJob(&wg)
+		//go memory.RunJob(&wg)
+		//go swap.RunJob(&wg)
+		//go network.RunJob(&wg)
+		
+		go disk.RunJob(&p)
 
-	//disk := agent.Disk{}
-	//go disk.RunJob(&wg)
-
-	network := agent.Network{}
-	go network.RunJob(&wg)
-
-	wg.Wait()
+		wg.Wait()
+	} else {
+		for {
+			//go cpu.RunJob(&wg)
+			//go memory.RunJob(&wg)
+			//go swap.RunJob(&wg)
+			//go network.RunJob(&wg)
+			//go disk.RunJob(&wg)
+			time.Sleep(5 * time.Second)
+		}
+	}
 }
