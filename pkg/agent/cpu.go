@@ -1,26 +1,26 @@
 package agent
 
 import (
-	"log"
-	"fmt"
-	"time"
-	"sync"
-	"sort"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/process"
+	"log"
+	"sort"
+	"sync"
+	"time"
 )
 
 type CPU struct {
-	Time              time.Time       `json:"time"`
-	CPUUsedPercent    float64         `json:"cpu_used_percent"`
-	CPUByProcess      []ProcessCPU    `json:"cpu_by_process"`
+	Time           time.Time    `json:"time"`
+	CPUUsedPercent float64      `json:"cpu_used_percent"`
+	CPUByProcess   []ProcessCPU `json:"cpu_by_process"`
 }
 
 type ProcessCPU struct {
-	Pid           int32     `json:"pid"`
-	Name          string  `json:"name"`
+	Pid            int32   `json:"pid"`
+	Name           string  `json:"name"`
 	CPUUsedPercent float64 `json:"cpu_used_percent"`
 }
 
@@ -41,7 +41,7 @@ func (c *CPU) GetCPUUsageTotal() {
 
 func (c *CPU) GetCPUUsageByProcess() {
 	reversed_freq := map[float64][]ProcessCPU{}
-	
+
 	ps, err := process.Processes()
 	if err != nil {
 		log.Fatal(err)
@@ -59,9 +59,9 @@ func (c *CPU) GetCPUUsageByProcess() {
 			p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
 			reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
 		}
-		
+
 	}
-	
+
 	var numbers []float64
 	for val := range reversed_freq {
 		numbers = append(numbers, val)
@@ -72,13 +72,13 @@ func (c *CPU) GetCPUUsageByProcess() {
 			c.CPUByProcess = append(c.CPUByProcess, p)
 		}
 	}
-	
+
 	//ser, err := json.Marshal(c)
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
 	//fmt.Println(string(ser))
-	
+
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
 	res, err := client.Post(

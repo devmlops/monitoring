@@ -1,29 +1,29 @@
 package agent
 
 import (
-	"log"
-	"fmt"
-	"sort"
-	"time"
-	"sync"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
+	"log"
+	"sort"
+	"sync"
+	"time"
 )
 
 type Memory struct {
 	Time              time.Time       `json:"time"`
-	MemoryTotalKB     uint64             `json:"memory_total_kb"`
-	MemoryUsedKB      uint64             `json:"memory_used_kb"`
+	MemoryTotalKB     uint64          `json:"memory_total_kb"`
+	MemoryUsedKB      uint64          `json:"memory_used_kb"`
 	MemoryUsedPercent float64         `json:"memory_used_percent"`
 	MemoryByProcess   []ProcessMemory `json:"memory_by_process"`
 }
 
 type ProcessMemory struct {
-	Pid           int32     `json:"pid"`
-	Name          string  `json:"name"`
-	MemoryUsedKB      uint64     `json:"memory_kb"`
+	Pid               int32   `json:"pid"`
+	Name              string  `json:"name"`
+	MemoryUsedKB      uint64  `json:"memory_kb"`
 	MemoryUsedPercent float32 `json:"memory_percent"`
 }
 
@@ -46,7 +46,7 @@ func (m *Memory) GetMemoryUsageTotal() {
 
 func (m *Memory) GetMemoryUsageByProcess() {
 	reversed_freq := map[uint64][]ProcessMemory{}
-	
+
 	ps, _ := process.Processes()
 	for _, proc := range ps {
 		memPercent, err := proc.MemoryPercent()
@@ -66,7 +66,7 @@ func (m *Memory) GetMemoryUsageByProcess() {
 			reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
 		}
 	}
-	
+
 	var numbers []int
 	for val := range reversed_freq {
 		numbers = append(numbers, int(val))
@@ -77,13 +77,13 @@ func (m *Memory) GetMemoryUsageByProcess() {
 			m.MemoryByProcess = append(m.MemoryByProcess, p)
 		}
 	}
-	
+
 	//ser, err := json.Marshal(m)
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
 	//fmt.Println(string(ser))
-	
+
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)
 	res, err := client.Post(

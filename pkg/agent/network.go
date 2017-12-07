@@ -1,14 +1,14 @@
 package agent
 
 import (
-	"log"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/shirou/gopsutil/net"
+	"log"
 	"sort"
 	"sync"
 	"time"
-	"bytes"
-	"encoding/json"
-	"github.com/shirou/gopsutil/net"
 )
 
 type Network struct {
@@ -68,7 +68,7 @@ func (n *Network) GetActiveConnections() {
 	//	log.Fatal(err)
 	//}
 	//fmt.Println(string(ser))
-	
+
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)
 	res, err := client.Post(
