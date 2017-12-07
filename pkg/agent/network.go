@@ -7,7 +7,7 @@ import (
 	"github.com/shirou/gopsutil/net"
 	"log"
 	"sort"
-	"sync"
+	//"sync"
 	"time"
 )
 
@@ -22,8 +22,10 @@ type Connection struct {
 	Number    uint64    `json:"number"`
 }
 
-func (n *Network) RunJob(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (n *Network) RunJob(p *Params) {
+	if p.UseWg {
+		defer p.Wg.Done()
+	}
 	n.GetActiveConnections()
 }
 
@@ -63,11 +65,14 @@ func (n *Network) GetActiveConnections() {
 			n.Connections += uint64(number)
 		}
 	}
-	//ser, err := json.Marshal(n)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(string(ser))
+	
+	if Debug == true {
+		ser, err := json.Marshal(n)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(ser))
+	}
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)

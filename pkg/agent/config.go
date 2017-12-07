@@ -7,4 +7,4 @@ type Params struct {
     Wg     *sync.WaitGroup
 }
 
-var Debug bool = true
+var Debug bool = false

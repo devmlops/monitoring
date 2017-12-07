@@ -2,12 +2,10 @@ package agent
 
 import (
 	//"bytes"
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/shirou/gopsutil/disk"
 	"log"
-	//"sort"
-	//"sync"
 	"time"
 )
 
@@ -31,21 +29,23 @@ func (d *Disk) GetDiskUsage() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(stat)
-	//m.MemoryTotalKB = stat.Total / 1024
-	//m.MemoryUsedKB = stat.Used / 1024
-	//m.MemoryUsedPercent = stat.UsedPercent
 	
-	//ser, err := json.Marshal(m)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(string(ser))
+	d.DiskTotalKB = stat.Total / 1024
+	d.DiskUsedKB = stat.Used / 1024
+	d.DiskUsedPercent = stat.UsedPercent
+	
+	if Debug == true {
+		ser, err := json.Marshal(d)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(ser))
+	}
 
 	//b := new(bytes.Buffer)
-	//json.NewEncoder(b).Encode(m)
+	//json.NewEncoder(b).Encode(d)
 	//res, err := client.Post(
-	//	fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "memory"),
+	//	fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "disk"),
 	//	"application/json; charset=utf-8",
 	//	b,
 	//)

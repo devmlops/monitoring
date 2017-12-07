@@ -8,7 +8,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"sort"
-	"sync"
+	//"sync"
 	"time"
 )
 
@@ -24,8 +24,10 @@ type ProcessCPU struct {
 	CPUUsedPercent float64 `json:"cpu_used_percent"`
 }
 
-func (c *CPU) RunJob(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (c *CPU) RunJob(p *Params) {
+	if p.UseWg {
+		defer p.Wg.Done()
+	}
 	c.GetCPUUsageTotal()
 	c.GetCPUUsageByProcess()
 }
@@ -73,11 +75,13 @@ func (c *CPU) GetCPUUsageByProcess() {
 		}
 	}
 
-	//ser, err := json.Marshal(c)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(string(ser))
+	if Debug == true {
+		ser, err := json.Marshal(c)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(ser))
+	}
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)

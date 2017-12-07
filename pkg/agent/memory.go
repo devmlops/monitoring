@@ -8,7 +8,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"sort"
-	"sync"
+	//"sync"
 	"time"
 )
 
@@ -27,8 +27,10 @@ type ProcessMemory struct {
 	MemoryUsedPercent float32 `json:"memory_percent"`
 }
 
-func (m *Memory) RunJob(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (m *Memory) RunJob(p *Params) {
+	if p.UseWg {
+		defer p.Wg.Done()
+	}
 	m.GetMemoryUsageTotal()
 	m.GetMemoryUsageByProcess()
 }
@@ -78,11 +80,13 @@ func (m *Memory) GetMemoryUsageByProcess() {
 		}
 	}
 
-	//ser, err := json.Marshal(m)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(string(ser))
+	if Debug == true {
+		ser, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(ser))
+	}
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)

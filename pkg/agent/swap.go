@@ -8,7 +8,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"sort"
-	"sync"
+	//"sync"
 	"time"
 )
 
@@ -27,8 +27,10 @@ type ProcessSwap struct {
 	SwapUsedPercent float64 `json:"swap_percent"`
 }
 
-func (s *Swap) RunJob(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (s *Swap) RunJob(p *Params) {
+	if p.UseWg {
+		defer p.Wg.Done()
+	}
 	s.GetSwapUsageTotal()
 	s.GetSwapUsageByProcess()
 }
@@ -79,11 +81,13 @@ func (s *Swap) GetSwapUsageByProcess() {
 		}
 	}
 
-	//ser, err := json.Marshal(s)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(string(ser))
+	if Debug == true {
+		ser, err := json.Marshal(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(ser))
+	}
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(s)
