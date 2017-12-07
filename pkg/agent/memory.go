@@ -35,6 +35,7 @@ func (m *Memory) RunJob(wg *sync.WaitGroup) {
 }
 
 func (m *Memory) GetMemoryUsageTotal() {
+	m.Time = time.Now().UTC()
 	stat, _ := mem.VirtualMemory()
 	m.MemoryTotalKB = stat.Total / 1024
 	m.MemoryUsedKB = stat.Used / 1024
@@ -42,8 +43,6 @@ func (m *Memory) GetMemoryUsageTotal() {
 }
 
 func (m *Memory) GetMemoryUsageByProcess() {
-	m.Time = time.Now().UTC()
-	
 	reversed_freq := map[uint64][]ProcessMemory{}
 	
 	ps, _ := process.Processes()

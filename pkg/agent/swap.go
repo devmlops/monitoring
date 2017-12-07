@@ -34,6 +34,7 @@ func (s *Swap) RunJob(wg *sync.WaitGroup) {
 }
 
 func (s *Swap) GetSwapUsageTotal() {
+	s.Time = time.Now().UTC()
 	stat, _ := mem.SwapMemory()
 	s.SwapTotalKB = stat.Total / 1024
 	s.SwapUsedKB = stat.Used / 1024
@@ -41,8 +42,6 @@ func (s *Swap) GetSwapUsageTotal() {
 }
 
 func (s *Swap) GetSwapUsageByProcess() {
-	s.Time = time.Now().UTC()
-	
 	reversed_freq := map[uint64][]ProcessSwap{}
 	
 	ps, _ := process.Processes()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 	"sync"
+	"sort"
 	"bytes"
 	"net/http"
 	"encoding/json"
@@ -40,18 +41,45 @@ func (c *CPU) GetCPUUsageTotal() {
 }
 
 func (c *CPU) GetCPUUsageByProcess() {
-	ps, _ := process.Processes()
+	reversed_freq := map[float64][]ProcessCPU{}
+	
+	ps, err := process.Processes()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, pid := range ps {
-		cpuPercent, _ := pid.CPUPercent()
+		cpuPercent, err := pid.CPUPercent()
+		if err != nil {
+			log.Fatal(err)
+		}
 		name, _ := pid.Name()
 		p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
-		c.CPUByProcess = append(c.CPUByProcess, p)
+		reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+		
 	}
-	ser, _ := json.Marshal(c)
+	
+	var numbers []float64
+	for val := range reversed_freq {
+		numbers = append(numbers, val)
+	}
+	sort.Sort(sort.Reverse(sort.Float64Slice(numbers)))
+	for _, number := range numbers {
+		for _, p := range reversed_freq[number] {
+			c.CPUByProcess = append(c.CPUByProcess, p)
+		}
+	}
+	
+	ser, err := json.Marshal(c)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(string(ser))
 	
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
-	res, _ := http.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
+	res, err := http.Post("http://192.168.88.141:8080/cpu", "application/json; charset=utf-8", b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(res)
 }
