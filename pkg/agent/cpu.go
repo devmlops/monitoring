@@ -15,9 +15,9 @@ type CPU struct {
 	Time           time.Time    `json:"time"`
 	CPUUsedPercent float64      `json:"cpu_used_percent"`
 	CPUByProcess   []ProcessCPU `json:"cpu_by_process"`
-	Server         Server       `json:"server"`
-	Debug          bool         `json:"debug"`
-	HostName       string       `json:"hostname"`
+	Server          Server        `json:"-"`
+	Debug           bool          `json:"-"`
+	Hostname        string        `json:"hostname"`
 }
 
 type ProcessCPU struct {

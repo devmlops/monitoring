@@ -1,22 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"sync"
 	"time"
+	"os"
+	"log"
 )
 
 func main() {
 	config := OpenConfig("config.json")
 	debug := config.Debug
 	server := config.Server
+	
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Println(err)
+	}
 
-	cpu := agent.CPU{Server: server, Debug: debug}
-	memory := agent.Memory{Server: server, Debug: debug}
-	swap := agent.Swap{Server: server, Debug: debug}
-	network := agent.Network{Server: server, Debug: debug}
-	disk := agent.Disk{Server: server, Debug: debug}
+	cpu := agent.CPU{Server: server, Debug: debug, Hostname: hostname}
+	memory := agent.Memory{Server: server, Debug: debug, Hostname: hostname}
+	swap := agent.Swap{Server: server, Debug: debug, Hostname: hostname}
+	network := agent.Network{Server: server, Debug: debug, Hostname: hostname}
+	disk := agent.Disk{Server: server, Debug: debug, Hostname: hostname}
 	var wg sync.WaitGroup
 
 	if debug == true {
