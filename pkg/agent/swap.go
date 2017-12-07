@@ -17,6 +17,8 @@ type Swap struct {
 	SwapUsedKB      uint64        `json:"swap_used_kb"`
 	SwapUsedPercent float64       `json:"swap_used_percent"`
 	SwapByProcess   []ProcessSwap `json:"swap_by_process"`
+	Server Server
+	Debug bool
 }
 
 type ProcessSwap struct {
@@ -46,6 +48,7 @@ func (s *Swap) GetSwapUsageTotal() {
 }
 
 func (s *Swap) GetSwapUsageByProcess() {
+	s.SwapByProcess = nil
 	reversed_freq := map[uint64][]ProcessSwap{}
 
 	ps, err := process.Processes()
@@ -83,7 +86,7 @@ func (s *Swap) GetSwapUsageByProcess() {
 		}
 	}
 
-	if Debug == true {
+	if s.Debug == true {
 		ser, err := json.Marshal(s)
 		if err != nil {
 			log.Println(err)
@@ -94,7 +97,7 @@ func (s *Swap) GetSwapUsageByProcess() {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(s)
 	res, err := client.Post(
-		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "swap"),
+		fmt.Sprintf("http://%s:%s/%s", s.Server.IP, s.Server.Port, "swap"),
 		"application/json; charset=utf-8",
 		b,
 	)

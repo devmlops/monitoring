@@ -15,6 +15,8 @@ type CPU struct {
 	Time           time.Time    `json:"time"`
 	CPUUsedPercent float64      `json:"cpu_used_percent"`
 	CPUByProcess   []ProcessCPU `json:"cpu_by_process"`
+	Server Server
+	Debug bool
 }
 
 type ProcessCPU struct {
@@ -41,6 +43,7 @@ func (c *CPU) GetCPUUsageTotal() {
 }
 
 func (c *CPU) GetCPUUsageByProcess() {
+	c.CPUByProcess = nil
 	reversed_freq := map[float64][]ProcessCPU{}
 
 	ps, err := process.Processes()
@@ -57,8 +60,10 @@ func (c *CPU) GetCPUUsageByProcess() {
 			if err != nil {
 				log.Println(err)
 			}
-			p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
-			reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+			if name != "hukumka-agent" {
+				p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
+				reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+			}
 		}
 
 	}
@@ -77,7 +82,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 		}
 	}
 
-	if Debug == true {
+	if c.Debug == true {
 		ser, err := json.Marshal(c)
 		if err != nil {
 			log.Println(err)
@@ -88,7 +93,7 @@ func (c *CPU) GetCPUUsageByProcess() {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(c)
 	res, err := client.Post(
-		fmt.Sprintf("http://%s:%s/%s", server.IP, server.port, "cpu"),
+		fmt.Sprintf("http://%s:%s/%s", c.Server.IP, c.Server.Port, "cpu"),
 		"application/json; charset=utf-8",
 		b,
 	)

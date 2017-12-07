@@ -21,4 +21,4 @@ cmd/agent/agent
 .idea
 
 # config
-cmd/server/config.json
+cmd/hukumka-agent/config.json
