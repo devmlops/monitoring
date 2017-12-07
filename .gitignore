@@ -14,11 +14,12 @@
 .glide/
 
 # binary
-cmd/server/server
-cmd/agent/agent
+cmd/hukumka-server/hukumka-server
+cmd/hukumka-agent/hukumka-agent
 
 # ide
 .idea
 
 # config
 cmd/hukumka-agent/config.json
+cmd/hukumka-server/config.json
