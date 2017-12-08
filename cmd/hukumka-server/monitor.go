@@ -52,13 +52,11 @@ type average struct {
 
 func (m *Monitor) AddNetwork(n agent.Network) {
 	//fmt.Println(">>> HERE 3")
-	//m.store.mu.Lock()
+	m.store.mu.Lock()
 	m.store.netData = append(m.store.netData, n)
 	m.store.average.netAverage += n.Connections
-	//fmt.Println(">>> HERE 4")
+	m.store.mu.Unlock()
 	m.AnalyseNetwork(n)
-	//fmt.Println(">>> HERE 5")
-	//m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -66,8 +64,8 @@ func (m *Monitor) AddMemory(n agent.Memory) {
 	m.store.mu.Lock()
 	m.store.memData = append(m.store.memData, n)
 	m.store.average.memAverage += n.MemoryUsedKB
-	m.AnalyseMemory(n)
 	m.store.mu.Unlock()
+	m.AnalyseMemory(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -75,8 +73,8 @@ func (m *Monitor) AddSwap(n agent.Swap) {
 	m.store.mu.Lock()
 	m.store.swapData = append(m.store.swapData, n)
 	m.store.average.swapAverage += n.SwapUsedKB
-	m.AnalyseSwap(n)
 	m.store.mu.Unlock()
+	m.AnalyseSwap(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -84,8 +82,8 @@ func (m *Monitor) AddDisk(n agent.Disk) {
 	m.store.mu.Lock()
 	m.store.diskData = append(m.store.diskData, n)
 	m.store.average.diskAverage += n.DiskUsedKB
-	m.AnalyseDisk(n)
 	m.store.mu.Unlock()
+	m.AnalyseDisk(n)
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
@@ -93,14 +91,14 @@ func (m *Monitor) AddCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	m.store.cpuData = append(m.store.cpuData, n)
 	m.store.average.cpuAverage += n.CPUUsedPercent
-	m.AnalyseCPU(n)
 	m.store.mu.Unlock()
+	m.AnalyseCPU(n)
 	//go m.Monitor
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
 func (m *Monitor) AnalyseNetwork(n agent.Network) {
-	//m.store.mu.Lock()
+	m.store.mu.Lock()
 	//fmt.Println(">>> HERE 6")
 	result := float64(m.store.average.netAverage) / float64(len(m.store.netData))
 	// +20%
@@ -162,7 +160,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
 		}
 	}
-	//m.store.mu.Unlock()
+	m.store.mu.Unlock()
 }
 
 func (m *Monitor) AnalyseMemory(n agent.Memory) {
