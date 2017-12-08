@@ -1,5 +1,7 @@
 # Hukumka monitoring
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/wwwthomson/monitoring)](https://goreportcard.com/report/github.com/wwwthomson/monitoring)
+
 ## Клиент-серверное приложение для мониторинга
 
 ### Агент
