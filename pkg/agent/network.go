@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/shirou/gopsutil/net"
 	"log"
 	"sort"
 	"time"
+
+	"github.com/shirou/gopsutil/net"
 )
 
 type Network struct {
 	Time            time.Time    `json:"time"`
 	Connections     uint64       `json:"connections"`
 	ConnectionsByIP []Connection `json:"connections_by_ip"`
-	Server          Server        `json:"-"`
-	Debug           bool          `json:"-"`
-	Hostname        string        `json:"hostname"`
+	Server          Server       `json:"-"`
+	Debug           bool         `json:"-"`
+	Hostname        string       `json:"hostname"`
 }
 
 type Connection struct {
@@ -77,11 +78,11 @@ func (n *Network) GetActiveConnections() {
 	}
 
 	//if n.Debug == true {
-		ser, err := json.Marshal(n)
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Println(string(ser))
+	ser, err := json.Marshal(n)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(string(ser))
 	//}
 
 	b := new(bytes.Buffer)

@@ -3,8 +3,9 @@ package main
 import (
 	//"fmt"
 	"sync"
-	"github.com/wwwthomson/monitoring/pkg/agent"
+
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 type Monitor struct {
@@ -322,11 +323,11 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuCounter = 3
 				fm := FormMessageCPU{
 					typeMessage: "DANGER CPU",
-					average: result,
-					max: m.config.CPU.MaxLimit,
-					real: n.CPUUsedPercent,
-					processes: n.CPUByProcess,
-					hostname: n.Hostname,
+					average:     result,
+					max:         m.config.CPU.MaxLimit,
+					real:        n.CPUUsedPercent,
+					processes:   n.CPUByProcess,
+					hostname:    n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)
@@ -340,11 +341,11 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuStatus = true
 				fm := FormMessageCPU{
 					typeMessage: "WARNING CPU",
-					average: result,
-					max: m.config.CPU.MaxLimit,
-					real: n.CPUUsedPercent,
-					processes: n.CPUByProcess,
-					hostname: n.Hostname,
+					average:     result,
+					max:         m.config.CPU.MaxLimit,
+					real:        n.CPUUsedPercent,
+					processes:   n.CPUByProcess,
+					hostname:    n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)

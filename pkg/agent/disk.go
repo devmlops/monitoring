@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/shirou/gopsutil/disk"
 	"log"
 	"time"
+
+	"github.com/shirou/gopsutil/disk"
 )
 
 type Disk struct {
@@ -14,9 +15,9 @@ type Disk struct {
 	DiskTotalKB     uint64    `json:"disk_total_kb"`
 	DiskUsedKB      uint64    `json:"disk_used_kb"`
 	DiskUsedPercent float64   `json:"disk_used_percent"`
-	Server          Server        `json:"-"`
-	Debug           bool          `json:"-"`
-	Hostname        string        `json:"hostname"`
+	Server          Server    `json:"-"`
+	Debug           bool      `json:"-"`
+	Hostname        string    `json:"hostname"`
 }
 
 func (d *Disk) RunJob(p *Params) {

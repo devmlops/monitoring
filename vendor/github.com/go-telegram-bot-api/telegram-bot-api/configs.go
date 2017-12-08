@@ -1038,8 +1038,8 @@ func (config DeleteMessageConfig) values() (url.Values, error) {
 
 // PinChatMessageConfig contains information of a message in a chat to pin.
 type PinChatMessageConfig struct {
-	ChatID int64
-	MessageID int
+	ChatID              int64
+	MessageID           int
 	DisableNotification bool
 }
 

@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/wwwthomson/monitoring/pkg/agent"
+	"log"
+	"os"
 	"sync"
 	"time"
-	"os"
-	"log"
+
+	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 func main() {
 	config := OpenConfig("config.json")
 	debug := config.Debug
 	server := config.Server
-	
+
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Println(err)
