@@ -103,27 +103,22 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 	result := float64(m.store.average.netAverage) / float64(len(m.store.netData))
 	// +20%
 	if float64(n.Connections) > float64(result*1.2) {
-	//if true {
 		if n.Connections >= m.config.Network.MaxLimit && m.store.Danger.netStatus == false {
-		//if true {
 			// check danger
 			if m.store.Danger.netCounter == 3 && m.store.Danger.netStatus != true {
-			//if true {
 				m.store.Warning.netStatus = true
 				m.store.Danger.netStatus = true
 				m.store.Warning.netCounter = 3
-				//fmt.Println("Allert Danger")
+
 				fm := FormMessageNet{
 					typeMessage: "DANGER Networking",
-					average: m.store.average.netAverage,
-					max: m.config.Network.MaxLimit,
-					real: n.Connections,
+					average:     uint64(result),
+					max:         m.config.Network.MaxLimit,
+					real:        n.Connections,
 					connections: n.ConnectionsByIP,
-					hostname: n.Hostname,
+					hostname:    n.Hostname,
 				}
-				//fmt.Println(fm)
 				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
-				//go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
 			} else {
 				m.store.Danger.netCounter += 1
 			}
@@ -132,11 +127,11 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 				m.store.Warning.netStatus = true
 				fm := FormMessageNet{
 					typeMessage: "WARNING Networking",
-					average: m.store.average.netAverage,
-					max: m.config.Network.MaxLimit,
-					real: n.Connections,
+					average:     uint64(result),
+					max:         m.config.Network.MaxLimit,
+					real:        n.Connections,
 					connections: n.ConnectionsByIP,
-					hostname: n.Hostname,
+					hostname:    n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
@@ -168,14 +163,22 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 	result := float64(m.store.average.memAverage) / float64(len(m.store.memData))
 	// +20%
 	if float64(n.MemoryUsedKB) > result*1.2 {
-		if n.MemoryUsedKB >= m.config.Memory.MaxLimit && m.store.Danger.memStatus == false {
+		if n.MemoryUsedKB >= (n.MemoryTotalKB*m.config.Memory.MaxLimit/100) && m.store.Danger.memStatus == false {
 			// check danger
 			if m.store.Danger.memCounter == 3 && m.store.Danger.memStatus != true {
 				m.store.Warning.memStatus = true
 				m.store.Danger.memStatus = true
 				m.store.Warning.memCounter = 3
-				//fmt.Println("Allert Danger")
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+
+				fm := FormMessageMem{
+					typeMessage:   "DANGER Memory",
+					average:       uint64(result),
+					max:           n.MemoryTotalKB * m.config.Memory.MaxLimit / 100,
+					real:          n.MemoryUsedKB,
+					processMemory: n.MemoryByProcess,
+					hostname:      n.Hostname,
+				}
+				go fm.SendAlertFromFormMem(m.bot, m.config.TelegramBot.Users)
 			} else {
 				m.store.Danger.memCounter += 1
 			}
@@ -183,9 +186,15 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 			// check warning
 			if m.store.Warning.memCounter == 3 && m.store.Warning.memStatus != true {
 				m.store.Warning.memStatus = true
-				//fmt.Println("Allert Warning")
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
-				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+				fm := FormMessageMem{
+					typeMessage:   "Warning Memory",
+					average:       uint64(result),
+					max:           n.MemoryTotalKB * m.config.Memory.MaxLimit / 100,
+					real:          n.MemoryUsedKB,
+					processMemory: n.MemoryByProcess,
+					hostname:      n.Hostname,
+				}
+				go fm.SendAlertFromFormMem(m.bot, m.config.TelegramBot.Users)
 			} else {
 				m.store.Warning.memCounter += 1
 			}
@@ -202,7 +211,7 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 			//fmt.Println("All good")
 			m.store.Danger.memStatus = false
 			m.store.Warning.memStatus = false
-			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "Memory: All good")
 		}
 	}
 	m.store.mu.Unlock()
@@ -302,7 +311,7 @@ func (m *Monitor) AnalyseDisk(n agent.Disk) {
 
 func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
-	result := m.store.average.cpuAverage / float64(len(m.store.netData))
+	result := float64(m.store.average.cpuAverage) / float64(len(m.store.netData))
 	// +20%
 	if n.CPUUsedPercent > result*1.2 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
@@ -313,7 +322,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuCounter = 3
 				fm := FormMessageCPU{
 					typeMessage: "DANGER CPU",
-					average: m.store.average.cpuAverage,
+					average: result,
 					max: m.config.CPU.MaxLimit,
 					real: n.CPUUsedPercent,
 					processes: n.CPUByProcess,
@@ -331,7 +340,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuStatus = true
 				fm := FormMessageCPU{
 					typeMessage: "WARNING CPU",
-					average: m.store.average.cpuAverage,
+					average: result,
 					max: m.config.CPU.MaxLimit,
 					real: n.CPUUsedPercent,
 					processes: n.CPUByProcess,
