@@ -119,7 +119,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 					typeMessage: "DANGER",
 					average: m.store.average.netAverage,
 					max: m.config.Network.MaxLimit,
-					real: m.store.netData[0].Connections,
+					real: n.Connections,
 					connections: n.ConnectionsByIP,
 					hostname: m.store.netData[0].Hostname,
 				}
