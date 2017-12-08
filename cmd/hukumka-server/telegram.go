@@ -39,9 +39,9 @@ func (m *FormMessageCPU) SendAlertFromFormCPU(bot *tgbotapi.BotAPI, users []int6
 	var message string
 	message = fmt.Sprintf("**%s**: %s\n", m.typeMessage, m.hostname)
 	message += fmt.Sprintf("%v\n", m.message)
-	message += fmt.Sprintf("Среднее: %v\n", m.average)
+	message += fmt.Sprintf("Среднее: %.2f\n", m.average)
 	message += fmt.Sprintf("Максимальное: %v\n", m.max)
-	message += fmt.Sprintf("Реальное: %v\n\n", m.real)
+	message += fmt.Sprintf("Реальное: %.2f\n\n", m.real)
 	if len(m.processes) != 0 {
 //<<<<<<< HEAD
 //		message += fmt.Sprintln("Top:")
@@ -52,7 +52,7 @@ func (m *FormMessageCPU) SendAlertFromFormCPU(bot *tgbotapi.BotAPI, users []int6
 		message += fmt.Sprintf("Top processes:\n")
 		for i, proc := range m.processes {
 			k := i+1
-			message += fmt.Sprintf("%v: %s `%v` %v\n", k, proc.Name, proc.Pid, proc.CPUUsedPercent)
+			message += fmt.Sprintf("%v: %s `%v` %.2f\n", k, proc.Name, proc.Pid, proc.CPUUsedPercent)
 		}
 	}
 	SendAlert(bot, users, message)
