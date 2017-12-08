@@ -119,7 +119,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 					max: m.config.Network.MaxLimit,
 					real: m.store.netData[0].Connections,
 					connections: n.ConnectionsByIP,
-					hostname: m.store.netData[0].Hostname,
+					hostname: n..Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
