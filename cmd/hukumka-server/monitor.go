@@ -320,19 +320,17 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuStatus = true
 				m.store.Danger.cpuStatus = true
 				m.store.Warning.cpuCounter = 3
-				//fmt.Println("Allert Danger")
-
-				//message := FormMessage{
-				//	typeMessage: "Danger",
-				//	from:        "CPU",
-				//	average:     result,
-				//	max:         m.config.CPU.MaxLimit,
-				//	real:        n.CPUUsedPercent,
-				//	message:     "Достигнут максимальный лимит",
-				//	processes:   func string{return "bla"}()
-				//}
-
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+				fm := FormMessageCPU{
+					typeMessage: "DANGER CPU",
+					average: m.store.average.cpuAverage,
+					max: m.config.CPU.MaxLimit,
+					real: n.CPUUsedPercent,
+					processes: n.CPUByProcess,
+					hostname: n.Hostname,
+				}
+				//fmt.Println(fm)
+				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)
+				//go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
 			} else {
 				m.store.Danger.cpuCounter += 1
 			}
@@ -340,8 +338,17 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 			// check warning
 			if m.store.Warning.cpuCounter == 3 && m.store.Warning.cpuStatus != true {
 				m.store.Warning.cpuStatus = true
-				//fmt.Println("Allert Warning")
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
+				fm := FormMessageCPU{
+					typeMessage: "WARNING CPU",
+					average: m.store.average.cpuAverage,
+					max: m.config.CPU.MaxLimit,
+					real: n.CPUUsedPercent,
+					processes: n.CPUByProcess,
+					hostname: n.Hostname,
+				}
+				//fmt.Println(fm)
+				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)
+				//go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
 				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
 			} else {
 				m.store.Warning.cpuCounter += 1
