@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -54,21 +55,24 @@ func (m *Memory) GetMemoryUsageByProcess() {
 
 	ps, _ := process.Processes()
 	for _, proc := range ps {
-		memPercent, err := proc.MemoryPercent()
-		if err != nil {
-			log.Println(err)
-		}
-		stat, err := proc.MemoryInfo()
-		if err != nil {
-			log.Println(err)
-		}
-		if stat.RSS > 0 {
-			name, err := proc.Name()
+		name := fmt.Sprintf("/proc/%v", proc.Pid)
+		if _, err := os.Stat(name); err == nil {
+			memPercent, err := proc.MemoryPercent()
 			if err != nil {
 				log.Println(err)
 			}
-			p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS / 1024}
-			reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
+			stat, err := proc.MemoryInfo()
+			if err != nil {
+				log.Println(err)
+			}
+			if stat.RSS > 0 {
+				name, err := proc.Name()
+				if err != nil {
+					log.Println(err)
+				}
+				p := ProcessMemory{Name: name, Pid: proc.Pid, MemoryUsedPercent: memPercent, MemoryUsedKB: stat.RSS / 1024}
+				reversed_freq[p.MemoryUsedKB] = append(reversed_freq[p.MemoryUsedKB], p)
+			}
 		}
 	}
 

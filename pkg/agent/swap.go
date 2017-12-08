@@ -58,22 +58,23 @@ func (s *Swap) GetSwapUsageByProcess() {
 		log.Println(err)
 	}
 	for _, proc := range ps {
-		if _, err := os.Stat("/path/to/whatever"); err == nil {
-		  // path/to/whatever exists
-		}
-		stat, err := proc.MemoryInfo()
-		if err != nil {
-			log.Println(err)
-		}
-		if stat.Swap > 0 {
-			used := stat.Swap / 1024
-			name, err := proc.Name()
+		name := fmt.Sprintf("/proc/%v", proc.Pid)
+		if _, err := os.Stat(name); err == nil {
+						
+			stat, err := proc.MemoryInfo()
 			if err != nil {
 				log.Println(err)
 			}
-			swapPercent := float64(used) / float64(s.SwapTotalKB) * 100
-			p := ProcessSwap{Name: name, Pid: proc.Pid, SwapUsedPercent: swapPercent, SwapUsedKB: used}
-			reversed_freq[p.SwapUsedKB] = append(reversed_freq[p.SwapUsedKB], p)
+			if stat.Swap > 0 {
+				used := stat.Swap / 1024
+				name, err := proc.Name()
+				if err != nil {
+					log.Println(err)
+				}
+				swapPercent := float64(used) / float64(s.SwapTotalKB) * 100
+				p := ProcessSwap{Name: name, Pid: proc.Pid, SwapUsedPercent: swapPercent, SwapUsedKB: used}
+				reversed_freq[p.SwapUsedKB] = append(reversed_freq[p.SwapUsedKB], p)
+			}
 		}
 	}
 

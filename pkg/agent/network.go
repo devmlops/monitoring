@@ -33,6 +33,7 @@ func (n *Network) RunJob(p *Params) {
 
 func (n *Network) GetActiveConnections() {
 	n.ConnectionsByIP = nil
+	n.Connections = 0
 	n.Time = time.Now().UTC()
 
 	cs, err := net.Connections("tcp")
@@ -75,13 +76,13 @@ func (n *Network) GetActiveConnections() {
 		}
 	}
 
-	if n.Debug == true {
+	//if n.Debug == true {
 		ser, err := json.Marshal(n)
 		if err != nil {
 			log.Println(err)
 		}
 		fmt.Println(string(ser))
-	}
+	//}
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(n)
