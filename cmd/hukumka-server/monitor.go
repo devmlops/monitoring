@@ -102,7 +102,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 	//fmt.Println(">>> HERE 6")
 	result := float64(m.store.average.netAverage) / float64(len(m.store.netData))
 	// +20%
-	if float64(n.Connections) > float64(result*1.2) {
+	if float64(n.Connections) > float64(result*2) {
 		if n.Connections >= m.config.Network.MaxLimit && m.store.Danger.netStatus == false {
 			// check danger
 			if m.store.Danger.netCounter == 3 && m.store.Danger.netStatus != true {
@@ -313,7 +313,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	result := float64(m.store.average.cpuAverage) / float64(len(m.store.netData))
 	// +20%
-	if n.CPUUsedPercent > result*1.2 {
+	if n.CPUUsedPercent > result*1.5 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
 			// check danger
 			if m.store.Danger.cpuCounter == 3 && m.store.Danger.cpuStatus != true {
