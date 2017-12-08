@@ -20,20 +20,8 @@ func HttpServer(data *Monitor) *gin.Engine {
 
 func Health() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//var request agent.Network
-		//err := c.BindJSON(&request)
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, gin.H{
-		//		"message": "ooops. I'm sorry =(",
-		//	})
-		//	return
-		//}
 		message := OpenMessage("message.txt")
 		c.String(http.StatusOK, message)
-		//c.JSON(http.StatusOK, gin.H{
-		//	"message": "Hukumka Server is ready to ",
-		//})
-		//data.AddNetwork(request)
 	}
 }
 
@@ -47,10 +35,12 @@ func Network(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
+		fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		data.AddNetwork(request)
+		//fmt.Printf(">>>> HERE")
+		go data.AddNetwork(request)
 	}
 }
 
@@ -64,10 +54,11 @@ func Memory(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
+		//fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		data.AddMemory(request)
+		go data.AddMemory(request)
 	}
 }
 
@@ -81,10 +72,11 @@ func Swap(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
+		//fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		data.AddSwap(request)
+		go data.AddSwap(request)
 	}
 }
 
@@ -98,11 +90,11 @@ func CPU(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Printf("%#v\n", request)
+		//fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		data.AddCPU(request)
+		go data.AddCPU(request)
 	}
 }
 
@@ -116,10 +108,10 @@ func Disk(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Printf("%#v\n", request)
+		//fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		data.AddDisk(request)
+		go data.AddDisk(request)
 	}
 }
