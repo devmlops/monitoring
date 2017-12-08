@@ -112,7 +112,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 
 				fm := FormMessageNet{
 					typeMessage: "DANGER Networking",
-					average:     m.store.average.netAverage,
+					average:     uint64(result),
 					max:         m.config.Network.MaxLimit,
 					real:        n.Connections,
 					connections: n.ConnectionsByIP,
@@ -127,7 +127,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 				m.store.Warning.netStatus = true
 				fm := FormMessageNet{
 					typeMessage: "WARNING Networking",
-					average:     m.store.average.netAverage,
+					average:     uint64(result),
 					max:         m.config.Network.MaxLimit,
 					real:        n.Connections,
 					connections: n.ConnectionsByIP,
@@ -172,7 +172,7 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 
 				fm := FormMessageMem{
 					typeMessage:   "DANGER Memory",
-					average:       m.store.average.memAverage,
+					average:       uint64(result),
 					max:           n.MemoryTotalKB * m.config.Memory.MaxLimit / 100,
 					real:          n.MemoryUsedKB,
 					processMemory: n.MemoryByProcess,
@@ -188,7 +188,7 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 				m.store.Warning.memStatus = true
 				fm := FormMessageMem{
 					typeMessage:   "Warning Memory",
-					average:       m.store.average.memAverage,
+					average:       uint64(result),
 					max:           n.MemoryTotalKB * m.config.Memory.MaxLimit / 100,
 					real:          n.MemoryUsedKB,
 					processMemory: n.MemoryByProcess,
@@ -311,7 +311,7 @@ func (m *Monitor) AnalyseDisk(n agent.Disk) {
 
 func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
-	result := m.store.average.cpuAverage / float64(len(m.store.netData))
+	result := float64(m.store.average.cpuAverage) / float64(len(m.store.netData))
 	// +20%
 	if n.CPUUsedPercent > result*1.2 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
@@ -322,7 +322,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuCounter = 3
 				fm := FormMessageCPU{
 					typeMessage: "DANGER CPU",
-					average: m.store.average.cpuAverage,
+					average: result,
 					max: m.config.CPU.MaxLimit,
 					real: n.CPUUsedPercent,
 					processes: n.CPUByProcess,
@@ -340,7 +340,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuStatus = true
 				fm := FormMessageCPU{
 					typeMessage: "WARNING CPU",
-					average: m.store.average.cpuAverage,
+					average: result,
 					max: m.config.CPU.MaxLimit,
 					real: n.CPUUsedPercent,
 					processes: n.CPUByProcess,
