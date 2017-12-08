@@ -43,7 +43,7 @@ func (n *Network) GetActiveConnections() {
 
 	freq := make(map[string]int)
 	for _, conn := range cs {
-		if (conn.Status == "ESTABLISHED") && (conn.Raddr.IP != "127.0.0.1") {
+		if (conn.Status == "ESTABLISHED") && (conn.Raddr.IP != "127.0.0.1") && (conn.Raddr.IP != n.Server.IP) {
 			_, ok := freq[conn.Raddr.IP]
 			if ok == true {
 				freq[conn.Raddr.IP] += 1
