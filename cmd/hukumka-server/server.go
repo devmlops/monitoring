@@ -9,12 +9,32 @@ import (
 
 func HttpServer(data *Monitor) *gin.Engine {
 	route := gin.Default()
+	route.GET("/health", Health())
 	route.POST("/network", Network(data))
 	route.POST("/memory", Memory(data))
 	route.POST("/swap", Swap(data))
 	route.POST("/cpu", CPU(data))
 	route.POST("/disk", Disk(data))
 	return route
+}
+
+func Health() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		//var request agent.Network
+		//err := c.BindJSON(&request)
+		//if err != nil {
+		//	c.JSON(http.StatusBadRequest, gin.H{
+		//		"message": "ooops. I'm sorry =(",
+		//	})
+		//	return
+		//}
+		message := OpenMessage("message.txt")
+		c.String(http.StatusOK, message)
+		//c.JSON(http.StatusOK, gin.H{
+		//	"message": "Hukumka Server is ready to ",
+		//})
+		//data.AddNetwork(request)
+	}
 }
 
 func Network(data *Monitor) gin.HandlerFunc {

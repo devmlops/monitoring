@@ -62,3 +62,12 @@ func OpenConfig(path string) Config {
 	}
 	return config
 }
+
+func OpenMessage(path string) string {
+	//var message string
+	message, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Failed to read %s", err)
+	}
+	return string(message)
+}
