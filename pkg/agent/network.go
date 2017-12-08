@@ -68,6 +68,9 @@ func (n *Network) GetActiveConnections() {
 		for _, s := range reversed_freq[number] {
 			c := Connection{IPAddress: s, Number: uint64(number)}
 			n.ConnectionsByIP = append(n.ConnectionsByIP, c)
+			if len(n.ConnectionsByIP) > 4 {
+				break
+			}
 			n.Connections += uint64(number)
 		}
 	}

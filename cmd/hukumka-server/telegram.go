@@ -20,34 +20,63 @@ func RunTelegramBot(token string) *tgbotapi.BotAPI {
 func SendAlert(bot *tgbotapi.BotAPI, users []int64, message string) {
 	for _, id := range users {
 		ApiMessage := tgbotapi.NewMessage(id, message)
+		ApiMessage.ParseMode = "markdown"
 		bot.Send(ApiMessage)
 	}
 }
 
 type FormMessage struct {
 	typeMessage string
-	from        string
-	avarage     float64
+	average     float64
 	max         uint64
 	real        uint64
 	message     string
-	processes     []string
-	server agent.Server
+	processes     []agent.ProcessCPU
+	hostname    string
 }
 
 func (m *FormMessage) SendAlertFromForm(bot *tgbotapi.BotAPI, users []int64) {
 	var message string
-	message = fmt.Sprintln("**%s**:", m.typeMessage, m.server.IP)
-	message += fmt.Sprintln("%s", m.from)
+	message = fmt.Sprintln("**%s**:", m.typeMessage, m.hostname)
 	message += fmt.Sprintln("%s", m.message)
-	message += fmt.Sprintln("Среднее: %s", m.avarage)
+	message += fmt.Sprintln("Среднее: %s", m.average)
 	message += fmt.Sprintln("Максимальное: %s", m.max)
 	message += fmt.Sprintln("Реальное: %s", m.real)
 	if len(m.processes) != 0 {
 		message += fmt.Sprintln("Top:")
-		for process := range m.processes {
-			message += fmt.Sprintln(process)
+		for i, process := range m.processes {
+			k := i+1
+			message += fmt.Sprintln("%s: %s %s %s\n", k, process.Name, process.Pid, process.CPUUsedPercent)
 		}
 	}
+	SendAlert(bot, users, message)
+}
+
+type FormMessageNet struct {
+	typeMessage string
+	average     uint64
+	max         uint64
+	real        uint64
+	message     string
+	connections     []agent.Connection
+	hostname    string
+}
+
+func (m *FormMessageNet) SendAlertFromFormNet(bot *tgbotapi.BotAPI, users []int64) {
+	var message string
+	message = fmt.Sprintf("**%s**: %s\n", m.typeMessage, m.hostname)
+	message += fmt.Sprintf("%v\n", m.message)
+	message += fmt.Sprintf("Среднее: %v\n", m.average)
+	message += fmt.Sprintf("Максимальное: %v\n", m.max)
+	message += fmt.Sprintf("Реальное: %v\n\n", m.real)
+	if len(m.connections) != 0 {
+		message += fmt.Sprintf("Top connections:\n")
+		for i, connection := range m.connections {
+			k := i+1
+			message += fmt.Sprintf("%v: `%s` %v\n", k, connection.IPAddress, connection.Number)
+		}
+	}
+	//fmt.Println(">>> HERE\n\n")
+	//fmt.Printf(message)
 	SendAlert(bot, users, message)
 }

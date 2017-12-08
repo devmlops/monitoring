@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/wwwthomson/monitoring/pkg/agent"
-	"fmt"
+	//"fmt"
 )
 
 func HttpServer(data *Monitor) *gin.Engine {
@@ -35,12 +35,13 @@ func Network(data *Monitor) gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Printf("%#v\n", request)
+		//fmt.Printf("%#v\n", request)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "yeees. It's OK =)",
 		})
-		//fmt.Printf(">>>> HERE")
+		//fmt.Printf(">>>> HERE 1")
 		go data.AddNetwork(request)
+		//fmt.Printf(">>>> HERE 2")
 	}
 }
 

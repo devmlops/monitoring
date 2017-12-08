@@ -13,7 +13,7 @@ func main()  {
     for i := 0; i <= 100; i++ {
         go func() {
             defer wg.Done()
-            _, err := net.Dial("tcp", "127.0.0.1:8080")
+            _, err := net.Dial("tcp", "127.0.0.1:8090")
             time.Sleep(10 * time.Minute)
             if err != nil {
                 fmt.Println("foo")

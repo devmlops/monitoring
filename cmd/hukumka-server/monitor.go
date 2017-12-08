@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"fmt"
 	"sync"
 	"github.com/wwwthomson/monitoring/pkg/agent"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -19,7 +20,7 @@ type Store struct {
 	cpuData  []agent.CPU
 	diskData []agent.Disk
 
-	avarage Avarage
+	average average
 
 	Warning Status
 	Danger  Status
@@ -41,7 +42,7 @@ type Status struct {
 	diskCounter int
 }
 
-type Avarage struct {
+type average struct {
 	netAverage  uint64
 	memAverage  uint64
 	swapAverage uint64
@@ -50,18 +51,21 @@ type Avarage struct {
 }
 
 func (m *Monitor) AddNetwork(n agent.Network) {
-	m.store.mu.Lock()
+	//fmt.Println(">>> HERE 3")
+	//m.store.mu.Lock()
 	m.store.netData = append(m.store.netData, n)
-	m.store.avarage.netAverage += n.Connections
+	m.store.average.netAverage += n.Connections
+	//fmt.Println(">>> HERE 4")
 	m.AnalyseNetwork(n)
-	m.store.mu.Unlock()
+	//fmt.Println(">>> HERE 5")
+	//m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
 }
 
 func (m *Monitor) AddMemory(n agent.Memory) {
 	m.store.mu.Lock()
 	m.store.memData = append(m.store.memData, n)
-	m.store.avarage.memAverage += n.MemoryUsedKB
+	m.store.average.memAverage += n.MemoryUsedKB
 	m.AnalyseMemory(n)
 	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
@@ -70,7 +74,7 @@ func (m *Monitor) AddMemory(n agent.Memory) {
 func (m *Monitor) AddSwap(n agent.Swap) {
 	m.store.mu.Lock()
 	m.store.swapData = append(m.store.swapData, n)
-	m.store.avarage.swapAverage += n.SwapUsedKB
+	m.store.average.swapAverage += n.SwapUsedKB
 	m.AnalyseSwap(n)
 	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
@@ -79,7 +83,7 @@ func (m *Monitor) AddSwap(n agent.Swap) {
 func (m *Monitor) AddDisk(n agent.Disk) {
 	m.store.mu.Lock()
 	m.store.diskData = append(m.store.diskData, n)
-	m.store.avarage.diskAverage += n.DiskUsedKB
+	m.store.average.diskAverage += n.DiskUsedKB
 	m.AnalyseDisk(n)
 	m.store.mu.Unlock()
 	//SendAlert(m.bot, m.config.TelegramBot.Users, "test")
@@ -88,7 +92,7 @@ func (m *Monitor) AddDisk(n agent.Disk) {
 func (m *Monitor) AddCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	m.store.cpuData = append(m.store.cpuData, n)
-	m.store.avarage.cpuAverage += n.CPUUsedPercent
+	m.store.average.cpuAverage += n.CPUUsedPercent
 	m.AnalyseCPU(n)
 	m.store.mu.Unlock()
 	//go m.Monitor
@@ -96,28 +100,49 @@ func (m *Monitor) AddCPU(n agent.CPU) {
 }
 
 func (m *Monitor) AnalyseNetwork(n agent.Network) {
-	m.store.mu.Lock()
-	result := float64(m.store.avarage.netAverage) / float64(len(m.store.netData))
+	//m.store.mu.Lock()
+	//fmt.Println(">>> HERE 6")
+	result := float64(m.store.average.netAverage) / float64(len(m.store.netData))
 	// +20%
 	if float64(n.Connections) > float64(result*1.2) {
+	//if true {
 		if n.Connections >= m.config.Network.MaxLimit && m.store.Danger.netStatus == false {
+		//if true {
 			// check danger
 			if m.store.Danger.netCounter == 3 && m.store.Danger.netStatus != true {
+			//if true {
 				m.store.Warning.netStatus = true
 				m.store.Danger.netStatus = true
 				m.store.Warning.netCounter = 3
 				//fmt.Println("Allert Danger")
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
+				fm := FormMessageNet{
+					typeMessage: "DANGER",
+					average: m.store.average.netAverage,
+					max: m.config.Network.MaxLimit,
+					real: m.store.netData[0].Connections,
+					connections: m.store.netData[0].ConnectionsByIP,
+					hostname: m.store.netData[0].Hostname,
+				}
+				//fmt.Println(fm)
+				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
+				//go SendAlert(m.bot, m.config.TelegramBot.Users, "Danger")
 			} else {
 				m.store.Danger.netCounter += 1
 			}
 		} else {
-			// check warning
 			if m.store.Warning.netCounter == 3 && m.store.Warning.netStatus != true {
 				m.store.Warning.netStatus = true
-				//fmt.Println("Allert Warning")
-				go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
-				//SendAlert(m.bot, m.config.TelegramBot.Users, fmt.Sprintf("%s \n среднее: %v \n реальные: %v", "Network: превышение свыше 20%", int(result), int(n.Connections)))
+				fm := FormMessageNet{
+					typeMessage: "WARNING",
+					average: m.store.average.netAverage,
+					max: m.config.Network.MaxLimit,
+					real: m.store.netData[0].Connections,
+					connections: m.store.netData[0].ConnectionsByIP,
+					hostname: m.store.netData[0].Hostname,
+				}
+				//fmt.Println(fm)
+				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
+				//go SendAlert(m.bot, m.config.TelegramBot.Users, "Warning")
 			} else {
 				m.store.Warning.netCounter += 1
 			}
@@ -137,12 +162,12 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
 		}
 	}
-	m.store.mu.Unlock()
+	//m.store.mu.Unlock()
 }
 
 func (m *Monitor) AnalyseMemory(n agent.Memory) {
 	m.store.mu.Lock()
-	result := float64(m.store.avarage.memAverage) / float64(len(m.store.memData))
+	result := float64(m.store.average.memAverage) / float64(len(m.store.memData))
 	// +20%
 	if float64(n.MemoryUsedKB) > result*1.2 {
 		if n.MemoryUsedKB >= m.config.Memory.MaxLimit && m.store.Danger.memStatus == false {
@@ -187,7 +212,7 @@ func (m *Monitor) AnalyseMemory(n agent.Memory) {
 
 func (m *Monitor) AnalyseSwap(n agent.Swap) {
 	m.store.mu.Lock()
-	result := float64(m.store.avarage.swapAverage) / float64(len(m.store.swapData))
+	result := float64(m.store.average.swapAverage) / float64(len(m.store.swapData))
 	// +20%
 	if float64(n.SwapUsedKB) > result*1.2 {
 		if n.SwapUsedKB >= m.config.Swap.MaxLimit && m.store.Danger.swapStatus == false {
@@ -232,7 +257,7 @@ func (m *Monitor) AnalyseSwap(n agent.Swap) {
 
 func (m *Monitor) AnalyseDisk(n agent.Disk) {
 	m.store.mu.Lock()
-	result := float64(m.store.avarage.diskAverage) / float64(len(m.store.diskData))
+	result := float64(m.store.average.diskAverage) / float64(len(m.store.diskData))
 	// +20%
 	if float64(n.DiskUsedKB) > result*1.2 {
 		if n.DiskUsedKB >= m.config.Disk.MaxLimit && m.store.Danger.diskStatus == false {
@@ -279,7 +304,7 @@ func (m *Monitor) AnalyseDisk(n agent.Disk) {
 
 func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
-	result := m.store.avarage.cpuAverage / float64(len(m.store.netData))
+	result := m.store.average.cpuAverage / float64(len(m.store.netData))
 	// +20%
 	if n.CPUUsedPercent > result*1.2 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
@@ -293,7 +318,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				//message := FormMessage{
 				//	typeMessage: "Danger",
 				//	from:        "CPU",
-				//	avarage:     result,
+				//	average:     result,
 				//	max:         m.config.CPU.MaxLimit,
 				//	real:        n.CPUUsedPercent,
 				//	message:     "Достигнут максимальный лимит",

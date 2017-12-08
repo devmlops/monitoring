@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -57,6 +58,9 @@ func (s *Swap) GetSwapUsageByProcess() {
 		log.Println(err)
 	}
 	for _, proc := range ps {
+		if _, err := os.Stat("/path/to/whatever"); err == nil {
+		  // path/to/whatever exists
+		}
 		stat, err := proc.MemoryInfo()
 		if err != nil {
 			log.Println(err)
