@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -51,22 +52,24 @@ func (c *CPU) GetCPUUsageByProcess() {
 	if err != nil {
 		log.Println(err)
 	}
-	for _, pid := range ps {
-		cpuPercent, err := pid.CPUPercent()
-		if err != nil {
-			log.Println(err)
-		}
-		if cpuPercent > 0 {
-			name, err := pid.Name()
+	for _, proc := range ps {
+		name := fmt.Sprintf("/proc/%v", proc.Pid)
+		if _, err := os.Stat(name); err == nil {
+			cpuPercent, err := proc.CPUPercent()
 			if err != nil {
 				log.Println(err)
 			}
-			if name != "hukumka-agent" {
-				p := ProcessCPU{Name: name, Pid: pid.Pid, CPUUsedPercent: cpuPercent}
-				reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+			if cpuPercent > 0 {
+				name, err := proc.Name()
+				if err != nil {
+					log.Println(err)
+				}
+				if name != "hukumka-agent" {
+					p := ProcessCPU{Name: name, Pid: proc.Pid, CPUUsedPercent: cpuPercent}
+					reversed_freq[p.CPUUsedPercent] = append(reversed_freq[p.CPUUsedPercent], p)
+				}
 			}
 		}
-
 	}
 
 	var numbers []float64
