@@ -357,7 +357,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 			//fmt.Println("All good")
 			m.store.Danger.cpuStatus = false
 			m.store.Warning.cpuStatus = false
-			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "CPU: All good")
 		}
 	}
 	m.store.mu.Unlock()
