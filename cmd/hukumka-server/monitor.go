@@ -114,12 +114,12 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 				m.store.Warning.netCounter = 3
 				//fmt.Println("Allert Danger")
 				fm := FormMessageNet{
-					typeMessage: "DANGER",
+					typeMessage: "DANGER Networking",
 					average: m.store.average.netAverage,
 					max: m.config.Network.MaxLimit,
 					real: n.Connections,
 					connections: n.ConnectionsByIP,
-					hostname: m.store.netData[0].Hostname,
+					hostname: n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
@@ -131,12 +131,12 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 			if m.store.Warning.netCounter == 3 && m.store.Warning.netStatus != true {
 				m.store.Warning.netStatus = true
 				fm := FormMessageNet{
-					typeMessage: "WARNING",
+					typeMessage: "WARNING Networking",
 					average: m.store.average.netAverage,
 					max: m.config.Network.MaxLimit,
-					real: m.store.netData[0].Connections,
-					connections: m.store.netData[0].ConnectionsByIP,
-					hostname: m.store.netData[0].Hostname,
+					real: n.Connections,
+					connections: n.ConnectionsByIP,
+					hostname: n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormNet(m.bot, m.config.TelegramBot.Users)
@@ -157,7 +157,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 			//fmt.Println("All good")
 			m.store.Danger.netStatus = false
 			m.store.Warning.netStatus = false
-			go SendAlert(m.bot, m.config.TelegramBot.Users, "All good")
+			go SendAlert(m.bot, m.config.TelegramBot.Users, "Networking: All good")
 		}
 	}
 	m.store.mu.Unlock()
