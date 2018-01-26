@@ -1,14 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
-	"encoding/json"
+
 	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 type Config struct {
-	Debug bool
+	Debug  bool
 	Server agent.Server
 }
 

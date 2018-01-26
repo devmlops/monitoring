@@ -1,15 +1,16 @@
 package agent
 
 import (
-	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/shirou/gopsutil/mem"
-	"github.com/shirou/gopsutil/process"
 	"log"
+	"os"
 	"sort"
 	"time"
+
+	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/process"
 )
 
 type Swap struct {
@@ -60,7 +61,7 @@ func (s *Swap) GetSwapUsageByProcess() {
 	for _, proc := range ps {
 		name := fmt.Sprintf("/proc/%v", proc.Pid)
 		if _, err := os.Stat(name); err == nil {
-						
+
 			stat, err := proc.MemoryInfo()
 			if err != nil {
 				log.Println(err)

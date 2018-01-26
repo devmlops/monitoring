@@ -1,15 +1,16 @@
 package agent
 
 import (
-	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/shirou/gopsutil/mem"
-	"github.com/shirou/gopsutil/process"
 	"log"
+	"os"
 	"sort"
 	"time"
+
+	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/process"
 )
 
 type Memory struct {
@@ -18,9 +19,9 @@ type Memory struct {
 	MemoryUsedKB      uint64          `json:"memory_used_kb"`
 	MemoryUsedPercent float64         `json:"memory_used_percent"`
 	MemoryByProcess   []ProcessMemory `json:"memory_by_process"`
-	Server          Server        `json:"-"`
-	Debug           bool          `json:"-"`
-	Hostname        string        `json:"hostname"`
+	Server            Server          `json:"-"`
+	Debug             bool            `json:"-"`
+	Hostname          string          `json:"hostname"`
 }
 
 type ProcessMemory struct {

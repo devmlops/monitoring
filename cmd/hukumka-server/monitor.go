@@ -3,8 +3,9 @@ package main
 import (
 	//"fmt"
 	"sync"
-	"github.com/wwwthomson/monitoring/pkg/agent"
+
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/wwwthomson/monitoring/pkg/agent"
 )
 
 type Monitor struct {
@@ -102,7 +103,7 @@ func (m *Monitor) AnalyseNetwork(n agent.Network) {
 	//fmt.Println(">>> HERE 6")
 	result := float64(m.store.average.netAverage) / float64(len(m.store.netData))
 	// +20%
-	if float64(n.Connections) > float64(result*1.2) {
+	if float64(n.Connections) > float64(result*2) {
 		if n.Connections >= m.config.Network.MaxLimit && m.store.Danger.netStatus == false {
 			// check danger
 			if m.store.Danger.netCounter == 3 && m.store.Danger.netStatus != true {
@@ -313,7 +314,7 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 	m.store.mu.Lock()
 	result := float64(m.store.average.cpuAverage) / float64(len(m.store.netData))
 	// +20%
-	if n.CPUUsedPercent > result*1.2 {
+	if n.CPUUsedPercent > result*1.5 {
 		if n.CPUUsedPercent >= float64(m.config.CPU.MaxLimit) && m.store.Danger.cpuStatus == false {
 			// check danger
 			if m.store.Danger.cpuCounter == 3 && m.store.Danger.cpuStatus != true {
@@ -322,11 +323,11 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuCounter = 3
 				fm := FormMessageCPU{
 					typeMessage: "DANGER CPU",
-					average: result,
-					max: m.config.CPU.MaxLimit,
-					real: n.CPUUsedPercent,
-					processes: n.CPUByProcess,
-					hostname: n.Hostname,
+					average:     result,
+					max:         m.config.CPU.MaxLimit,
+					real:        n.CPUUsedPercent,
+					processes:   n.CPUByProcess,
+					hostname:    n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)
@@ -340,11 +341,11 @@ func (m *Monitor) AnalyseCPU(n agent.CPU) {
 				m.store.Warning.cpuStatus = true
 				fm := FormMessageCPU{
 					typeMessage: "WARNING CPU",
-					average: result,
-					max: m.config.CPU.MaxLimit,
-					real: n.CPUUsedPercent,
-					processes: n.CPUByProcess,
-					hostname: n.Hostname,
+					average:     result,
+					max:         m.config.CPU.MaxLimit,
+					real:        n.CPUUsedPercent,
+					processes:   n.CPUByProcess,
+					hostname:    n.Hostname,
 				}
 				//fmt.Println(fm)
 				go fm.SendAlertFromFormCPU(m.bot, m.config.TelegramBot.Users)

@@ -1,24 +1,25 @@
 package agent
 
 import (
-	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/process"
 	"log"
+	"os"
 	"sort"
 	"time"
+
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/process"
 )
 
 type CPU struct {
 	Time           time.Time    `json:"time"`
 	CPUUsedPercent float64      `json:"cpu_used_percent"`
 	CPUByProcess   []ProcessCPU `json:"cpu_by_process"`
-	Server          Server        `json:"-"`
-	Debug           bool          `json:"-"`
-	Hostname        string        `json:"hostname"`
+	Server         Server       `json:"-"`
+	Debug          bool         `json:"-"`
+	Hostname       string       `json:"hostname"`
 }
 
 type ProcessCPU struct {
